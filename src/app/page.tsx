@@ -290,7 +290,7 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="flex flex-col items-center bg-card border border-border p-8 rounded-[2rem] shadow-sm">
+            <div className="flex flex-col items-center glass-card p-8 shadow-md">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/5 text-accent font-black mb-6 text-sm border border-accent/15">
                 01
               </div>
@@ -300,7 +300,7 @@ export default async function HomePage() {
               </p>
             </div>
             
-            <div className="flex flex-col items-center bg-card border border-border p-8 rounded-[2rem] shadow-sm">
+            <div className="flex flex-col items-center glass-card p-8 shadow-md">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/5 text-accent font-black mb-6 text-sm border border-accent/15">
                 02
               </div>
@@ -310,7 +310,7 @@ export default async function HomePage() {
               </p>
             </div>
 
-            <div className="flex flex-col items-center bg-card border border-border p-8 rounded-[2rem] shadow-sm">
+            <div className="flex flex-col items-center glass-card p-8 shadow-md">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-warning/5 text-warning font-black mb-6 text-sm border border-warning/15">
                 03
               </div>

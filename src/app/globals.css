@@ -7,53 +7,53 @@
   --card: #ffffff;
   --card-foreground: #0f172a;
   
-  --border: #f1f5f9;
-  --border-hover: #e2e8f0;
+  --border: #e2e8f0;
+  --border-hover: #cbd5e1;
   
-  --muted: #64748b;
-  --muted-foreground: #94a3b8;
+  --muted: #475569;
+  --muted-foreground: #64748b;
   
-  --accent: #2563eb;
-  --accent-hover: #1d4ed8;
+  --accent: #4f46e5;
+  --accent-hover: #4338ca;
   --accent-foreground: #ffffff;
   
   --primary: #0f172a;
   --primary-foreground: #f8fafc;
   
-  --warning: #eab308;
-  --success: #10b981;
-  --danger: #ef4444;
+  --warning: #d97706;
+  --success: #059669;
+  --danger: #dc2626;
 
-  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --hover-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02);
+  --hover-shadow: 0 30px 60px -20px rgba(79, 70, 229, 0.12), 0 10px 20px -10px rgba(79, 70, 229, 0.05);
 }
 
 .dark {
-  --background: #090b11;
-  --foreground: #f1f5f9;
+  --background: #060813;
+  --foreground: #f8fafc;
   
-  --card: #11141d;
-  --card-foreground: #f1f5f9;
+  --card: #0d1127;
+  --card-foreground: #f8fafc;
   
-  --border: #1d2230;
-  --border-hover: #262c3e;
+  --border: #1a2245;
+  --border-hover: #263168;
   
   --muted: #94a3b8;
   --muted-foreground: #475569;
   
-  --accent: #3b82f6;
-  --accent-hover: #60a5fa;
-  --accent-foreground: #090b11;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --accent-foreground: #060813;
   
-  --primary: #f1f5f9;
-  --primary-foreground: #090b11;
+  --primary: #f8fafc;
+  --primary-foreground: #060813;
   
   --warning: #fbbf24;
   --success: #34d399;
   --danger: #f87171;
 
-  --card-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --hover-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  --card-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.7), 0 1px 2px rgba(99, 102, 241, 0.05);
+  --hover-shadow: 0 35px 70px -25px rgba(99, 102, 241, 0.25), 0 10px 30px -15px rgba(99, 102, 241, 0.1);
 }
 
 @theme {
@@ -87,10 +87,17 @@
 /* Global resets & animations */
 body {
   background-color: var(--background);
+  background-image: radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.02) 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, rgba(79, 70, 229, 0.01) 0px, transparent 50%);
   color: var(--foreground);
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
   transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark body {
+  background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+                    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.04) 0px, transparent 50%);
 }
 
 /* Premium Card Design styles */
@@ -108,9 +115,22 @@ body {
   box-shadow: var(--hover-shadow);
 }
 
+.glass-card {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 24px;
+}
+
+.dark .glass-card {
+  background: rgba(13, 17, 39, 0.65);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(26, 34, 69, 0.7);
+}
+
 .glass-badge {
-  background: rgba(37, 99, 235, 0.05);
-  border: 1px solid rgba(37, 99, 235, 0.1);
+  background: rgba(79, 70, 229, 0.05);
+  border: 1px solid rgba(79, 70, 229, 0.1);
   color: var(--accent);
   border-radius: 9999px;
   font-weight: 700;
@@ -118,8 +138,8 @@ body {
 }
 
 .dark .glass-badge {
-  background: rgba(59, 130, 246, 0.1);
-  border: 1px solid rgba(59, 130, 246, 0.15);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.15);
   color: var(--accent);
 }
 

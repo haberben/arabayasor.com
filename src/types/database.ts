@@ -39,6 +39,7 @@ export interface Generation {
   years: string
   engines: EngineOption[]
   buying_guide: string
+  image_url?: string
   created_at: string
   models?: Model
 }

@@ -188,9 +188,9 @@ export default function SearchPage() {
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
             
             {/* LEFT SIDEBAR: FILTERS */}
-            <div className="lg:col-span-1 bg-card border border-border rounded-3xl p-6 shadow-sm space-y-6">
-              <div className="flex items-center justify-between border-b border-border/80 pb-4">
-                <span className="text-xs font-black uppercase tracking-wider text-foreground/80 flex items-center gap-1.5">
+            <div className="lg:col-span-1 glass-card p-6 shadow-xl space-y-6">
+              <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                <span className="text-xs font-black uppercase tracking-wider text-foreground/90 flex items-center gap-1.5">
                   <SlidersHorizontal className="h-4.5 w-4.5 text-accent" />
                   Kriter Filtreleri
                 </span>
@@ -293,9 +293,9 @@ export default function SearchPage() {
             {/* RIGHT COLUMN: SEARCH RESULTS */}
             <div className="lg:col-span-3 space-y-6">
               
-              <div className="flex justify-between items-center bg-card border border-border px-6 py-4 rounded-3xl">
-                <span className="text-xs font-bold text-muted">
-                  {filteredGenerations.length} araç kasası bulundu.
+              <div className="flex justify-between items-center glass-card px-6 py-4 shadow-sm">
+                <span className="text-xs font-bold text-muted-foreground">
+                  {filteredGenerations.length} araç nesli/kasası listeleniyor.
                 </span>
               </div>
 
@@ -317,14 +317,22 @@ export default function SearchPage() {
                       {/* Car Card Body */}
                       <div className="p-6 flex flex-col md:flex-row items-center gap-6">
                         
-                        {/* Car Silhouette Placeholder (Custom vector by brand) */}
-                        <div className="w-full md:w-48 shrink-0 relative group">
-                          <CarSilhouette brand={brandObj?.name || ''} />
+                        {/* Car Image with Brand Logo Overlay */}
+                        <div className="w-full md:w-48 shrink-0 relative group overflow-hidden rounded-2xl border border-border bg-muted/10">
+                          {gen.image_url ? (
+                            <img
+                              src={gen.image_url}
+                              alt={`${brandObj?.name} ${modelObj?.name} ${gen.name}`}
+                              className="w-full h-32 object-cover transition-transform duration-500 group-hover:scale-105"
+                            />
+                          ) : (
+                            <CarSilhouette brand={brandObj?.name || ''} />
+                          )}
                           {brandObj && (
                             <img
                               src={brandObj.logo_url}
                               alt={brandObj.name}
-                              className="absolute top-2 left-2 h-6 w-6 bg-white dark:bg-slate-900 border border-border rounded-lg p-0.5"
+                              className="absolute top-2 left-2 h-6 w-6 bg-white dark:bg-slate-900 border border-border/80 rounded-lg p-0.5 shadow-sm"
                             />
                           )}
                         </div>
@@ -377,7 +385,7 @@ export default function SearchPage() {
 
                       {/* EXPANDED ACCORDION DETAILS PANEL */}
                       {isExpanded && (
-                        <div className="border-t border-border bg-background/50 p-6 animate-in slide-in-from-top-4 duration-200">
+                        <div className="border-t border-border bg-card/15 backdrop-blur-md p-6 animate-in slide-in-from-top-4 duration-200">
                           
                           {/* Inner Tabs Navigation */}
                           <div className="flex border-b border-border/80 pb-3 mb-6 overflow-x-auto gap-4 custom-scrollbar">
@@ -406,7 +414,7 @@ export default function SearchPage() {
                                   const total = (prob.yes_votes || 0) + (prob.no_votes || 0)
                                   const pct = total > 0 ? Math.round((prob.yes_votes || 0) / total * 100) : 0
                                   return (
-                                    <div key={prob.id} className="bg-card border border-border/60 p-4 rounded-2xl flex items-center justify-between gap-4">
+                                    <div key={prob.id} className="glass-card p-4 flex items-center justify-between gap-4 shadow-sm hover:border-accent/30 transition-all">
                                       <div>
                                         <h4 className="text-xs font-bold text-foreground/90">{prob.title}</h4>
                                         <p className="text-[10px] text-muted mt-1">{prob.description}</p>
@@ -433,7 +441,7 @@ export default function SearchPage() {
                             <div className="space-y-4">
                               {genReviews.length > 0 ? (
                                 genReviews.map((rev) => (
-                                  <div key={rev.id} className="bg-card border border-border/60 p-4 rounded-2xl">
+                                  <div key={rev.id} className="glass-card p-4 shadow-sm hover:border-accent/30 transition-all">
                                     <div className="flex justify-between items-center text-[10px] mb-2">
                                       <span className="font-bold text-foreground">@{rev.profiles?.username} ({rev.profiles?.role})</span>
                                       <span className="text-muted">{new Date(rev.created_at).toLocaleDateString('tr-TR')}</span>
@@ -452,7 +460,7 @@ export default function SearchPage() {
                           {/* TAB CONTENT: SPARE PARTS */}
                           {expandedTab === 'parts' && (
                             <div className="space-y-4">
-                              <div className="bg-card border border-border p-4 rounded-2xl">
+                              <div className="glass-card p-5 shadow-md hover:border-accent/30 transition-all">
                                 <div className="flex justify-between items-center gap-2 mb-4 pb-2 border-b border-border/80">
                                   <div>
                                     <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
@@ -515,7 +523,7 @@ export default function SearchPage() {
                           {/* TAB CONTENT: PROS & CONS */}
                           {expandedTab === 'proscons' && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              <div className="bg-success/5 border border-success/20 p-4 rounded-2xl">
+                              <div className="bg-success/5 border border-success/15 p-5 rounded-[20px] shadow-sm hover:border-success/30 transition-all">
                                 <h4 className="text-xs font-bold text-success flex items-center gap-1 mb-3">
                                   <ThumbsUp className="h-4 w-4" />
                                   Öne Çıkan Artılar (Pros)
@@ -530,7 +538,7 @@ export default function SearchPage() {
                                 </ul>
                               </div>
 
-                              <div className="bg-danger/5 border border-danger/20 p-4 rounded-2xl">
+                              <div className="bg-danger/5 border border-danger/15 p-5 rounded-[20px] shadow-sm hover:border-danger/30 transition-all">
                                 <h4 className="text-xs font-bold text-danger flex items-center gap-1 mb-3">
                                   <ThumbsDown className="h-4 w-4" />
                                   Kritik Eksiler (Cons)
@@ -549,7 +557,7 @@ export default function SearchPage() {
 
                           {/* TAB CONTENT: AI ANALYSIS */}
                           {expandedTab === 'analysis' && (
-                            <div className="bg-card border border-border/60 p-4 rounded-2xl relative overflow-hidden">
+                            <div className="glass-card p-5 relative overflow-hidden shadow-md">
                               <div className="absolute top-0 right-0 h-16 w-16 bg-warning/5 rounded-full blur-xl"></div>
                               <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-2">
                                 <Sparkles className="h-4 w-4 text-warning" />

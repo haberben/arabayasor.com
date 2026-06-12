@@ -403,6 +403,28 @@ export default function GenerationDetailClient({
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
       
+      {/* Premium Car Hero Banner */}
+      {generation.image_url && (
+        <div className="relative w-full h-[220px] sm:h-[320px] rounded-[32px] overflow-hidden border border-border mb-10 group shadow-lg">
+          <img 
+            src={generation.image_url} 
+            alt={`${generation.models?.brands?.name} ${generation.models?.name} ${generation.name}`} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-103"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent"></div>
+          {generation.models?.brands && (
+            <div className="absolute top-4 left-4 sm:top-6 sm:left-6 flex items-center gap-3 bg-card/70 backdrop-blur-md border border-border px-4 py-2 rounded-2xl">
+              <img 
+                src={generation.models.brands.logo_url} 
+                alt={generation.models.brands.name} 
+                className="h-8 w-8 object-contain"
+              />
+              <span className="text-xs sm:text-sm font-black text-foreground">{generation.models.brands.name} Türkiye</span>
+            </div>
+          )}
+        </div>
+      )}
+      
       {/* Header Info */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-10 pb-8 border-b border-border/80">
         <div>
@@ -475,7 +497,7 @@ export default function GenerationDetailClient({
           
           {/* Motor Seçenekleri */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-card border border-border p-6 rounded-3xl">
+            <div className="glass-card p-6 shadow-md">
               <h2 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2">
                 <Activity className="h-5 w-5 text-accent" />
                 Motor ve Tüketim Seçenekleri
@@ -483,7 +505,7 @@ export default function GenerationDetailClient({
               <div className="grid grid-cols-1 gap-4">
                 {generation.engines && generation.engines.length > 0 ? (
                   generation.engines.map((eng: any, idx: number) => (
-                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-background border border-border/80">
+                    <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-card/40 border border-border/60 hover:border-accent/30 transition-colors">
                       <div>
                         <h4 className="text-sm font-bold">{eng.name}</h4>
                         <span className="text-[10px] bg-muted px-2 py-0.5 rounded font-semibold text-muted-foreground mt-1 inline-block">
@@ -503,12 +525,12 @@ export default function GenerationDetailClient({
             </div>
 
             {/* Buying Guide Snippet */}
-            <div className="bg-card border border-border p-6 rounded-3xl">
+            <div className="glass-card p-6 shadow-md">
               <h2 className="text-lg font-black tracking-tight mb-3 flex items-center gap-2">
                 <Wrench className="h-5 w-5 text-warning" />
                 Alırken Dikkat Edilmesi Gerekenler
               </h2>
-              <div className="text-sm text-muted leading-relaxed line-clamp-4 bg-background p-4 rounded-2xl border border-border/60">
+              <div className="text-sm text-muted leading-relaxed line-clamp-4 bg-card/40 p-4 rounded-2xl border border-border/60">
                 {generation.buying_guide ? (
                   generation.buying_guide.replace(/[#*]/g, '').trim()
                 ) : (
@@ -526,7 +548,7 @@ export default function GenerationDetailClient({
 
           {/* Oylama Puanlama Detayları */}
           <div className="lg:col-span-1 space-y-6">
-            <div className="bg-card border border-border p-6 rounded-3xl">
+            <div className="glass-card p-6 shadow-md">
               <h3 className="text-sm font-black uppercase tracking-wider text-foreground/80 mb-6">
                 Kategori Derecelendirmeleri
               </h3>
@@ -648,7 +670,7 @@ export default function GenerationDetailClient({
                 const votedType = userVotedProblems[prob.id]
 
                 return (
-                  <div key={prob.id} className="bg-card border border-border p-6 rounded-3xl hover:shadow-md transition-shadow">
+                  <div key={prob.id} className="glass-card p-6 shadow-md hover:border-accent/30 transition-all">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -661,7 +683,7 @@ export default function GenerationDetailClient({
                       </div>
 
                       {/* SVG Bar Chart Layout */}
-                      <div className="w-full sm:w-48 shrink-0 flex flex-col gap-2 p-3 bg-background border border-border/60 rounded-2xl">
+                      <div className="w-full sm:w-48 shrink-0 flex flex-col gap-2 p-3 bg-card/40 border border-border/60 rounded-2xl">
                         <div className="flex justify-between text-[10px] font-bold">
                           <span className="text-danger">Kronik: %{percentage}</span>
                           <span className="text-muted">{total} Oy</span>
@@ -817,7 +839,7 @@ export default function GenerationDetailClient({
                 })
 
                 return (
-                  <div key={rev.id} className={`bg-card border p-6 rounded-3xl hover:shadow-md transition-shadow relative ${isPinned ? 'border-warning/40 shadow-sm' : 'border-border'}`}>
+                  <div key={rev.id} className={`glass-card p-6 shadow-md hover:border-accent/30 transition-all relative ${isPinned ? 'border-warning/40 shadow-sm' : ''}`}>
                     {isPinned && (
                       <span className="absolute top-4 right-4 text-warning flex items-center gap-1 text-[10px] font-black uppercase bg-warning/10 px-2 py-0.5 rounded-full">
                         <Pin className="h-3 w-3 rotate-45" /> Sabitlenmiş
@@ -842,7 +864,7 @@ export default function GenerationDetailClient({
                     </div>
 
                     {/* Kriter Puanları (Mini Slider) */}
-                    <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 my-4 bg-background border border-border/50 p-3 rounded-2xl text-center">
+                    <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 my-4 bg-card/40 border border-border/50 p-3 rounded-2xl text-center">
                       {[
                         { short: 'Mot', val: rev.rating_engine },
                         { short: 'Şan', val: rev.rating_gearbox },

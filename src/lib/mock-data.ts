@@ -27,6 +27,7 @@ export const mockGenerations: Generation[] = [
     name: 'E90',
     slug: 'e90',
     years: '2005 - 2013',
+    image_url: '/cars/e90.png',
     engines: [
       { name: '320i (2.0L 150hp Atmosferik Benzin)', fuel: 'Benzin', consumption: '7.9L/100km' },
       { name: '320d (2.0L 177hp Turbo Dizel)', fuel: 'Dizel', consumption: '5.7L/100km' },
@@ -46,6 +47,7 @@ export const mockGenerations: Generation[] = [
     name: 'F30',
     slug: 'f30',
     years: '2012 - 2019',
+    image_url: '/cars/f30.png',
     engines: [
       { name: '316i (1.6L 136hp Turbo Benzin - N13)', fuel: 'Benzin', consumption: '5.9L/100km' },
       { name: '320d (2.0L 184hp/190hp Turbo Dizel)', fuel: 'Dizel', consumption: '4.5L/100km' },
@@ -64,6 +66,7 @@ export const mockGenerations: Generation[] = [
     name: 'W204',
     slug: 'w204',
     years: '2007 - 2014',
+    image_url: '/cars/w204.png',
     engines: [
       { name: 'C180 Kompressor (1.6L 156hp M271)', fuel: 'Benzin/LPG', consumption: '7.5L/100km' },
       { name: 'C180 CGI (1.8L 156hp Turbo Benzin)', fuel: 'Benzin', consumption: '6.9L/100km' },
@@ -82,6 +85,7 @@ export const mockGenerations: Generation[] = [
     name: 'B8 (A4)',
     slug: 'b8',
     years: '2008 - 2015',
+    image_url: '/cars/b8.png',
     engines: [
       { name: '2.0 TDI (2.0L 143hp Turbo Dizel)', fuel: 'Dizel', consumption: '5.4L/100km' },
       { name: '1.8 TFSI (1.8L 160hp Turbo Benzin)', fuel: 'Benzin', consumption: '7.1L/100km' }
@@ -99,6 +103,7 @@ export const mockGenerations: Generation[] = [
     name: 'E160 (11. Nesil)',
     slug: 'e160',
     years: '2012 - 2019',
+    image_url: '/cars/e160.png',
     engines: [
       { name: '1.33 Dual VVT-i (99hp Atmosferik)', fuel: 'Benzin/LPG', consumption: '5.6L/100km' },
       { name: '1.6 Valvematic (132hp Atmosferik)', fuel: 'Benzin/LPG', consumption: '6.3L/100km' },
@@ -117,6 +122,7 @@ export const mockGenerations: Generation[] = [
     name: 'Megane IV',
     slug: 'megane-4',
     years: '2016 - 2024',
+    image_url: '/cars/megane-4.png',
     engines: [
       { name: '1.5 dCi (1.5L 110hp/115hp Turbo Dizel)', fuel: 'Dizel', consumption: '4.1L/100km' },
       { name: '1.3 TCe (1.3L 140hp Turbo Benzin)', fuel: 'Benzin', consumption: '5.4L/100km' },
@@ -135,6 +141,7 @@ export const mockGenerations: Generation[] = [
     name: 'Clio IV',
     slug: 'clio-4',
     years: '2012 - 2020',
+    image_url: '/cars/clio-4.png',
     engines: [
       { name: '1.5 dCi (1.5L 75hp/90hp Turbo Dizel)', fuel: 'Dizel', consumption: '3.7L/100km' },
       { name: '0.9 TCe (0.9L 90hp Üç Silindir Turbo)', fuel: 'Benzin', consumption: '4.9L/100km' },

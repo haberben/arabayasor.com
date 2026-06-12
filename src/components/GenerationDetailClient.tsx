@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase-client'
+import { getSparePartsByGen } from '@/lib/parts-data'
 import { 
   Brand, Model, Generation, Review, ProblemReport, Comment, Profile 
 } from '@/types/database'
@@ -47,7 +48,7 @@ export default function GenerationDetailClient({
   const supabase = createClient()
 
   // Tab State
-  const [activeTab, setActiveTab] = useState<'overview' | 'problems' | 'reviews' | 'guide'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'problems' | 'reviews' | 'guide' | 'parts'>('overview')
 
   // Data States
   const [reviews, setReviews] = useState<any[]>(initialReviews)
@@ -451,6 +452,12 @@ export default function GenerationDetailClient({
           className={`pb-4 text-xs font-bold tracking-wider uppercase border-b-2 shrink-0 transition-all ${activeTab === 'reviews' ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-foreground'}`}
         >
           Değerlendirmeler ({reviews.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('parts')}
+          className={`pb-4 text-xs font-bold tracking-wider uppercase border-b-2 shrink-0 transition-all ${activeTab === 'parts' ? 'border-accent text-accent' : 'border-transparent text-muted hover:text-foreground'}`}
+        >
+          Yedek Parça Fiyatları
         </button>
         <button
           onClick={() => setActiveTab('guide')}
@@ -941,6 +948,82 @@ export default function GenerationDetailClient({
                 Henüz değerlendirme yapılmamış. Bu kasaya ilk yorumu siz yazın!
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* 5. SPARE PARTS TAB */}
+      {activeTab === 'parts' && (
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="bg-card border border-border rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-border/80">
+              <div>
+                <h2 className="text-xl font-black tracking-tight flex items-center gap-2">
+                  <Wrench className="h-5.5 w-5.5 text-accent" />
+                  Ortalama Yedek Parça & İşçilik Fiyatları
+                </h2>
+                <p className="text-xs text-muted mt-1">
+                  Piyasa ortalaması OEM (Orijinal) ve Yan Sanayi yedek parça fiyatları ile tahmini işçilik maliyetleri.
+                </p>
+              </div>
+              <span className="text-[10px] bg-accent/10 text-accent font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                Haziran 2026 Güncel
+              </span>
+            </div>
+
+            {/* Fiyat Tablosu */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-border/80 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <th className="pb-3 pl-2">Parça Adı</th>
+                    <th className="pb-3 text-center">OEM (Orijinal)</th>
+                    <th className="pb-3 text-center">Yan Sanayi</th>
+                    <th className="pb-3 text-center">Ort. İşçilik</th>
+                    <th className="pb-3 text-center pr-2">Montaj Zorluğu</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40 text-xs">
+                  {getSparePartsByGen(generation.slug).items.map((part, idx) => (
+                    <tr key={idx} className="hover:bg-muted/30 transition-colors">
+                      <td className="py-4 pl-2 font-bold text-foreground/90">{part.name}</td>
+                      <td className="py-4 text-center font-semibold text-warning">{part.oemPrice}</td>
+                      <td className="py-4 text-center font-semibold text-emerald-500">{part.aftermarketPrice}</td>
+                      <td className="py-4 text-center text-muted-foreground">{part.laborCost}</td>
+                      <td className="py-4 text-center pr-2">
+                        <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                          part.difficulty === 'Kolay' ? 'bg-emerald-500/10 text-emerald-500' :
+                          part.difficulty === 'Orta' ? 'bg-warning/10 text-warning' :
+                          'bg-danger/10 text-danger'
+                        }`}>
+                          {part.difficulty}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Genel Notlar */}
+            <div className="mt-8 bg-background border border-border/60 rounded-2xl p-4 sm:p-5">
+              <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5 mb-2">
+                <AlertCircle className="h-4 w-4 text-accent" />
+                Önemli Parça Değişim Notları
+              </h4>
+              <p className="text-xs text-muted leading-relaxed">
+                {getSparePartsByGen(generation.slug).generalNotes}
+              </p>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="mt-6 flex items-start gap-2.5 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl p-4 text-[10px] text-muted leading-relaxed">
+              <ShieldAlert className="h-4.5 w-4.5 text-warning shrink-0 mt-0.5" />
+              <div>
+                <strong className="text-foreground/90 block mb-0.5">Fiyatlar Değişkenlik Gösterebilir</strong>
+                Burada listelenen fiyatlar Türkiye pazarı genel ortalaması temel alınarak bilgilendirme amacıyla hazırlanmıştır. Kur farkı, parça markası (Bosch, Sachs, Lemförder vb.) ve ustanızın işçilik tarifesine göre fiyatlar değişiklik gösterebilir. Parça satın almadan önce şase numarası ile parça sorgulaması yapılması tavsiye edilir.
+              </div>
+            </div>
           </div>
         </div>
       )}

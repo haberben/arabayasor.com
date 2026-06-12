@@ -5,10 +5,11 @@ import Link from 'next/link'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { mockBrands, mockModels, mockGenerations, mockReviews, mockProblemReports } from '@/lib/mock-data'
+import { getSparePartsByGen } from '@/lib/parts-data'
 import { 
   Search, SlidersHorizontal, ChevronDown, ChevronUp, Star, 
   ShieldAlert, MessageSquare, Sparkles, Plus, Minus, RotateCcw, 
-  HelpCircle, ThumbsUp, ThumbsDown, ArrowRight, Car, Activity
+  HelpCircle, ThumbsUp, ThumbsDown, ArrowRight, Car, Activity, Wrench, AlertCircle
 } from 'lucide-react'
 
 // Minimalist vector SVGs representing each car silhouette by brand
@@ -81,7 +82,7 @@ export default function SearchPage() {
 
   // Expand State
   const [expandedGenId, setExpandedGenId] = useState<string | null>(null)
-  const [expandedTab, setExpandedTab] = useState<'problems' | 'reviews' | 'analysis' | 'proscons'>('problems')
+  const [expandedTab, setExpandedTab] = useState<'problems' | 'reviews' | 'analysis' | 'proscons' | 'parts'>('problems')
 
   // Dynamic Models list based on selected brand
   const filteredModels = selectedBrand
@@ -383,6 +384,7 @@ export default function SearchPage() {
                             {[
                               { id: 'problems', label: `Kronik Sorunlar (${genProblems.length})` },
                               { id: 'reviews', label: `Değerlendirmeler (${genReviews.length})` },
+                              { id: 'parts', label: 'Yedek Parça Fiyatları' },
                               { id: 'proscons', label: 'Artı & Eksiler' },
                               { id: 'analysis', label: 'AI Analiz Özeti' },
                             ].map((tab) => (
@@ -444,6 +446,69 @@ export default function SearchPage() {
                               ) : (
                                 <p className="text-xs text-muted text-center py-4">Henüz yazılmış bir değerlendirme bulunmuyor.</p>
                               )}
+                            </div>
+                          )}
+
+                          {/* TAB CONTENT: SPARE PARTS */}
+                          {expandedTab === 'parts' && (
+                            <div className="space-y-4">
+                              <div className="bg-card border border-border p-4 rounded-2xl">
+                                <div className="flex justify-between items-center gap-2 mb-4 pb-2 border-b border-border/80">
+                                  <div>
+                                    <h4 className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                                      <Wrench className="h-4 w-4 text-accent" />
+                                      Ortalama Parça & İşçilik Fiyatları
+                                    </h4>
+                                    <p className="text-[10px] text-muted">OEM ve Yan Sanayi tahmini parça fiyatları.</p>
+                                  </div>
+                                  <span className="text-[9px] bg-accent/15 text-accent font-bold px-2 py-0.5 rounded-full uppercase">
+                                    Güncel Fiyatlar
+                                  </span>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                  <table className="w-full text-left border-collapse text-[11px]">
+                                    <thead>
+                                      <tr className="border-b border-border/80 font-bold text-muted-foreground uppercase">
+                                        <th className="pb-2">Parça Adı</th>
+                                        <th className="pb-2 text-center">OEM</th>
+                                        <th className="pb-2 text-center">Yan Sanayi</th>
+                                        <th className="pb-2 text-center">İşçilik</th>
+                                        <th className="pb-2 text-center pr-2">Zorluk</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-border/40">
+                                      {getSparePartsByGen(gen.slug).items.map((part, idx) => (
+                                        <tr key={idx} className="hover:bg-muted/10 transition-colors">
+                                          <td className="py-2 font-semibold text-foreground/80">{part.name}</td>
+                                          <td className="py-2 text-center font-bold text-warning">{part.oemPrice}</td>
+                                          <td className="py-2 text-center font-bold text-emerald-500">{part.aftermarketPrice}</td>
+                                          <td className="py-2 text-center text-muted-foreground">{part.laborCost}</td>
+                                          <td className="py-2 text-center pr-2">
+                                            <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${
+                                              part.difficulty === 'Kolay' ? 'bg-emerald-500/10 text-emerald-500' :
+                                              part.difficulty === 'Orta' ? 'bg-warning/10 text-warning' :
+                                              'bg-danger/10 text-danger'
+                                            }`}>
+                                              {part.difficulty}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+
+                                <div className="mt-4 bg-background border border-border/60 rounded-xl p-3">
+                                  <h5 className="text-[10px] font-bold text-foreground flex items-center gap-1 mb-1">
+                                    <AlertCircle className="h-3.5 w-3.5 text-accent" />
+                                    Uzman Tavsiyesi:
+                                  </h5>
+                                  <p className="text-[10px] text-muted leading-relaxed">
+                                    {getSparePartsByGen(gen.slug).generalNotes}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           )}
 

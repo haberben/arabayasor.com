@@ -128,23 +128,26 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-            {brands.map((brand) => (
-              <Link
-                key={brand.id}
-                href={`/arac/${brand.slug}`}
-                className="premium-card flex flex-col items-center justify-center p-6 text-center group"
-              >
-                <div className="relative h-16 w-16 mb-4 flex items-center justify-center bg-background rounded-2xl p-2 border border-border/40">
-                  <img
-                    src={brand.logo_url}
-                    alt={`${brand.name} logosu`}
-                    className="max-h-12 max-w-12 object-contain group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <span className="text-xs font-bold text-foreground/90 group-hover:text-accent transition-colors">{brand.name}</span>
-                <span className="text-[10px] text-muted font-bold mt-1 uppercase tracking-wider">İncele</span>
-              </Link>
-            ))}
+            {brands.map((brand) => {
+              const localLogo = `/logos/${brand.slug.toLowerCase()}.svg`
+              return (
+                <Link
+                  key={brand.id}
+                  href={`/arac/${brand.slug}`}
+                  className="premium-card flex flex-col items-center justify-center p-6 text-center group"
+                >
+                  <div className="relative h-16 w-16 mb-4 flex items-center justify-center bg-card/60 backdrop-blur-md rounded-2xl p-2 border border-border/50 shadow-inner">
+                    <img
+                      src={localLogo}
+                      alt={`${brand.name} logosu`}
+                      className="max-h-12 max-w-12 object-contain group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-foreground/90 group-hover:text-accent transition-colors">{brand.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-wider">İncele</span>
+                </Link>
+              )
+            })}
           </div>
         </section>
 
@@ -170,7 +173,7 @@ export default async function HomePage() {
                     return (
                       <div
                         key={prob.id}
-                        className="premium-card p-5 relative overflow-hidden"
+                        className="glass-card p-5 relative overflow-hidden shadow-md hover:border-accent/30 transition-all duration-300"
                       >
                         <div className="flex justify-between items-start gap-3">
                           <h4 className="text-xs font-bold text-foreground/90 leading-snug">{prob.title}</h4>
@@ -232,7 +235,7 @@ export default async function HomePage() {
                     return (
                       <div
                         key={rev.id}
-                        className="premium-card p-6 flex flex-col justify-between"
+                        className="glass-card p-6 flex flex-col justify-between shadow-md hover:border-accent/30 transition-all duration-300"
                       >
                         <div>
                           <div className="flex justify-between items-start mb-4">

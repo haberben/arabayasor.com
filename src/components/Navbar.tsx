@@ -8,7 +8,8 @@ import { useTheme } from '@/context/ThemeContext'
 import { createClient } from '@/lib/supabase-client'
 import { 
   Search, Sun, Moon, LogIn, User as UserIcon, LogOut, Menu, X, 
-  Settings, ShieldAlert, BookOpen, Sparkles, MessageSquare, AlertCircle
+  Settings, ShieldAlert, BookOpen, Sparkles, MessageSquare, AlertCircle,
+  SlidersHorizontal
 } from 'lucide-react'
 
 interface SearchResult {
@@ -216,6 +217,10 @@ export default function Navbar() {
 
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-6">
+              <Link href="/arama" className="flex items-center gap-1.5 text-sm font-semibold text-foreground/80 hover:text-accent transition-colors">
+                <SlidersHorizontal className="h-4 w-4 text-accent" />
+                Gelişmiş Arama
+              </Link>
               <Link href="/ai-analiz" className="flex items-center gap-1.5 text-sm font-semibold text-foreground/80 hover:text-accent transition-colors">
                 <Sparkles className="h-4 w-4 text-warning" />
                 AI İlan Analizi
@@ -414,6 +419,15 @@ export default function Navbar() {
                 </div>
               )}
             </div>
+
+            <Link
+              href="/arama"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-3 py-3 px-4 rounded-2xl bg-accent/10 text-accent font-bold text-sm mb-2"
+            >
+              <SlidersHorizontal className="h-5 w-5" />
+              Gelişmiş Arama
+            </Link>
 
             <Link
               href="/ai-analiz"

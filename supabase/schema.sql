@@ -399,16 +399,16 @@ insert into public.badges (name, description, icon) values
 ('Usta Desteği', 'Puanı ve katkılarıyla "Usta" seviyesine yükseldi.', 'Wrench')
 on conflict do nothing;
 
--- Örnek Markaları Ekle
+-- Örnek Markaları Ekle (Yerel SVG Logoları ile)
 insert into public.brands (name, slug, logo_url) values
-('BMW', 'bmw', 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg'),
-('Mercedes-Benz', 'mercedes-benz', 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Benz_logo.svg'),
-('Audi', 'audi', 'https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg'),
-('Toyota', 'toyota', 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Toyota_EU.svg'),
-('Renault', 'renault', 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Renault_2021.svg')
+('BMW', 'bmw', '/logos/bmw.svg'),
+('Mercedes-Benz', 'mercedes-benz', '/logos/mercedes.svg'),
+('Audi', 'audi', '/logos/audi.svg'),
+('Toyota', 'toyota', '/logos/toyota.svg'),
+('Renault', 'renault', '/logos/renault.svg')
 on conflict do nothing;
 
--- Örnek Modelleri Ekle (BMW için 3 Serisi, Mercedes için C Serisi vb.)
+-- Örnek Modelleri Ekle
 insert into public.models (brand_id, name, slug) values
 ((select id from public.brands where slug = 'bmw'), '3 Serisi', '3-series'),
 ((select id from public.brands where slug = 'bmw'), '5 Serisi', '5-series'),
@@ -417,7 +417,8 @@ insert into public.models (brand_id, name, slug) values
 ((select id from public.brands where slug = 'audi'), 'A4', 'a4'),
 ((select id from public.brands where slug = 'audi'), 'A6', 'a6'),
 ((select id from public.brands where slug = 'toyota'), 'Corolla', 'corolla'),
-((select id from public.brands where slug = 'renault'), 'Megane', 'megane')
+((select id from public.brands where slug = 'renault'), 'Megane', 'megane'),
+((select id from public.brands where slug = 'renault'), 'Clio', 'clio')
 on conflict do nothing;
 
 -- Örnek Kasaları (Generations) Ekle
@@ -461,6 +462,17 @@ insert into public.generations (model_id, name, slug, years, engines, buying_gui
 * **Arka Taşıyıcı Paslanması**: Tuzlu bölgelerde kullanılan araçlarda arka taşıyıcı (subframe) paslanıp kırılabilir, Mercedes bunu ücretsiz geri çağrıyla değiştirmektedir.'
 ),
 (
+  (select id from public.models where slug = 'a4' and brand_id = (select id from public.brands where slug = 'audi')),
+  'B8 (A4)', 'b8', '2008 - 2015',
+  '[
+    {"name": "2.0 TDI (2.0L 143hp Turbo Dizel)", "fuel": "Dizel", "consumption": "5.4L/100km"},
+    {"name": "1.8 TFSI (1.8L 160hp Turbo Benzin)", "fuel": "Benzin", "consumption": "7.1L/100km"}
+  ]'::jsonb,
+  '### Audi A4 B8 Alırken Dikkat Edilmesi Gerekenler
+* **TFSI Yağ Yakma**: Piston segmanlarındaki hata nedeniyle TFSI motorlarda yüksek yağ tüketimi kroniktir.
+* **Multitronic TCU**: Şanzıman beyninin lehim çatlakları nedeniyle arızalanması ve vites geçişlerinde vuruntu yapması yaygındır.'
+),
+(
   (select id from public.models where slug = 'corolla' and brand_id = (select id from public.brands where slug = 'toyota')),
   'E160 (11. Nesil)', 'e160', '2012 - 2019',
   '[
@@ -471,6 +483,28 @@ insert into public.generations (model_id, name, slug, years, engines, buying_gui
   '### Corolla E160 Alırken Dikkat Edilmesi Gerekenler
 * **MultiMode Şanzıman Isınması**: Yarı otomatik (M/M) şanzımanlarda trafikte ısınma ve kendini korumaya alma (N konumuna atma) sorunu görülebilir.
 * **Yol Sesi**: Davlumbaz ve taban yalıtımı zayıf olduğu için yüksek hızlarda tekerlek sesi içeriye fazla gelir.'
+),
+(
+  (select id from public.models where slug = 'megane' and brand_id = (select id from public.brands where slug = 'renault')),
+  'Megane IV', 'megane-4', '2016 - 2024',
+  '[
+    {"name": "1.5 dCi (1.5L 110hp Turbo Dizel)", "fuel": "Dizel", "consumption": "4.1L/100km"},
+    {"name": "1.3 TCe (1.3L 140hp Turbo Benzin)", "fuel": "Benzin", "consumption": "5.4L/100km"}
+  ]'::jsonb,
+  '### Megane 4 Alırken Dikkat Edilmesi Gerekenler
+* **EDC Vuruntusu**: EDC çift kavramalı şanzımanda beyin ısınması ve vites geçişlerinde sarsıntı kroniktir.
+* **Amortisör Toz Körükleri**: Süspansiyonlardan gelen gıcırtı sesleri genelde toz körüklerinin yerinden çıkmasından kaynaklanır.'
+),
+(
+  (select id from public.models where slug = 'clio' and brand_id = (select id from public.brands where slug = 'renault')),
+  'Clio IV', 'clio-4', '2012 - 2020',
+  '[
+    {"name": "1.5 dCi (1.5L 90hp Turbo Dizel)", "fuel": "Dizel", "consumption": "3.7L/100km"},
+    {"name": "0.9 TCe (0.9L 90hp Turbo)", "fuel": "Benzin", "consumption": "4.9L/100km"}
+  ]'::jsonb,
+  '### Clio 4 Alırken Dikkat Edilmesi Gerekenler
+* **Rüzgar Sesi**: Aynalardan ve kapı fitillerinden dolayı 90 km/s hızın üzerinde kabine yoğun rüzgar sesi girmesi kroniktir.
+* **Far Sararması**: Plastik kalitesinden ötürü far camlarının güneş altında çok hızlı sararma yapması yaygındır.'
 )
 on conflict do nothing;
 
@@ -480,5 +514,8 @@ insert into public.problem_reports (generation_id, title, description) values
 ((select id from public.generations where slug = 'e90'), 'N46 Yağ Eksiltme/Subap Keçesi', 'Valvetronic motorlarda subap lastiklerinin sertleşerek egzozdan mavi duman atması.'),
 ((select id from public.generations where slug = 'f30'), 'N13 Su Eksiltme / Devirdaim', 'Turbo benzinli 1.6 motorlarda plastik su flanşlarının ve boruların gevşeyip sızdırması.'),
 ((select id from public.generations where slug = 'f30'), 'Direksiyon Kutusu Boşluğu', 'Bozuk yollarda direksiyondan lok lok ses gelmesi.'),
-((select id from public.generations where slug = 'w204'), 'M271 Zincir ve Eksantrik Dişlisi', 'Zamanla eksantrik dişlisinin (vanos) aşınması ve soğuk startta ses yapması.')
+((select id from public.generations where slug = 'w204'), 'M271 Zincir ve Eksantrik Dişlisi', 'Zamanla eksantrik dişlisinin (vanos) aşınması ve soğuk startta ses yapması.'),
+((select id from public.generations where slug = 'b8'), 'TFSI Piston Segman Aşınması', 'Yağ tüketiminin aşırı derecede artması ve silindir basınç kaybı.'),
+((select id from public.generations where slug = 'megane-4'), 'EDC Beyin Arızası', 'Şanzıman beyninin aşırı ısınıp geçici olarak vitesleri devre dışı bırakması.')
 on conflict do nothing;
+

@@ -1,11 +1,11 @@
 import { Brand, Model, Generation, Review, ProblemReport, Comment, Profile } from '@/types/database'
 
 export const mockBrands: Brand[] = [
-  { id: '1', name: 'BMW', slug: 'bmw', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/4/44/BMW.svg', created_at: '' },
-  { id: '2', name: 'Mercedes-Benz', slug: 'mercedes-benz', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Mercedes-Benz_logo.svg', created_at: '' },
-  { id: '3', name: 'Audi', slug: 'audi', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/9/92/Audi-Logo_2016.svg', created_at: '' },
-  { id: '4', name: 'Toyota', slug: 'toyota', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Toyota_EU.svg', created_at: '' },
-  { id: '5', name: 'Renault', slug: 'renault', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/b/b3/Renault_2021.svg', created_at: '' }
+  { id: '1', name: 'BMW', slug: 'bmw', logo_url: '/logos/bmw.svg', created_at: '' },
+  { id: '2', name: 'Mercedes-Benz', slug: 'mercedes-benz', logo_url: '/logos/mercedes.svg', created_at: '' },
+  { id: '3', name: 'Audi', slug: 'audi', logo_url: '/logos/audi.svg', created_at: '' },
+  { id: '4', name: 'Toyota', slug: 'toyota', logo_url: '/logos/toyota.svg', created_at: '' },
+  { id: '5', name: 'Renault', slug: 'renault', logo_url: '/logos/renault.svg', created_at: '' }
 ]
 
 export const mockModels: Model[] = [
@@ -16,7 +16,8 @@ export const mockModels: Model[] = [
   { id: '301', brand_id: '3', name: 'A4', slug: 'a4', created_at: '' },
   { id: '302', brand_id: '3', name: 'A6', slug: 'a6', created_at: '' },
   { id: '401', brand_id: '4', name: 'Corolla', slug: 'corolla', created_at: '' },
-  { id: '501', brand_id: '5', name: 'Megane', slug: 'megane', created_at: '' }
+  { id: '501', brand_id: '5', name: 'Megane', slug: 'megane', created_at: '' },
+  { id: '502', brand_id: '5', name: 'Clio', slug: 'clio', created_at: '' }
 ]
 
 export const mockGenerations: Generation[] = [
@@ -76,6 +77,23 @@ export const mockGenerations: Generation[] = [
     models: { id: '201', brand_id: '2', name: 'C Serisi', slug: 'c-class', created_at: '', brands: mockBrands[1] }
   },
   {
+    id: '3001',
+    model_id: '301',
+    name: 'B8 (A4)',
+    slug: 'b8',
+    years: '2008 - 2015',
+    engines: [
+      { name: '2.0 TDI (2.0L 143hp Turbo Dizel)', fuel: 'Dizel', consumption: '5.4L/100km' },
+      { name: '1.8 TFSI (1.8L 160hp Turbo Benzin)', fuel: 'Benzin', consumption: '7.1L/100km' }
+    ],
+    buying_guide: `### Audi A4 B8 Alırken Dikkat Edilmesi Gerekenler
+* **1.8/2.0 TFSI Yağ Yakma Problemi**: Piston segmanlarındaki tasarım hatası nedeniyle aşırı yağ yakma kroniktir. Alırken segman revizyonu yapılıp yapılmadığı sorulmalıdır.
+* **Multitronic Şanzıman Beyni**: CVT şanzıman beyni (TCU) trafikte ısınma ve lehim çatlaması ile arıza verir. Şanzıman geçişlerinde sarsıntı olmamalıdır.
+* **Ön Takım Burçları**: Ağır kasa yapısı nedeniyle ön amortisör burçları ve salıncaklar çabuk aşınır, kasislerde gıcırtı sesi yapar.`,
+    created_at: '',
+    models: { id: '301', brand_id: '3', name: 'A4', slug: 'a4', created_at: '', brands: mockBrands[2] }
+  },
+  {
     id: '4001',
     model_id: '401',
     name: 'E160 (11. Nesil)',
@@ -92,6 +110,42 @@ export const mockGenerations: Generation[] = [
 * **Direksiyon Mafsalı**: Yavaş hızlarda bozuk yolda direksiyonda hafif boşluk hissi ve tıkırtı hissi verebilir.`,
     created_at: '',
     models: { id: '401', brand_id: '4', name: 'Corolla', slug: 'corolla', created_at: '', brands: mockBrands[3] }
+  },
+  {
+    id: '5001',
+    model_id: '501',
+    name: 'Megane IV',
+    slug: 'megane-4',
+    years: '2016 - 2024',
+    engines: [
+      { name: '1.5 dCi (1.5L 110hp/115hp Turbo Dizel)', fuel: 'Dizel', consumption: '4.1L/100km' },
+      { name: '1.3 TCe (1.3L 140hp Turbo Benzin)', fuel: 'Benzin', consumption: '5.4L/100km' },
+      { name: '1.6 Sce (1.6L 115hp Atmosferik Benzin)', fuel: 'Benzin/LPG', consumption: '6.6L/100km' }
+    ],
+    buying_guide: `### Megane 4 Alırken Dikkat Edilmesi Gerekenler
+* **EDC Çift Kavrama Vuruntusu**: 1.5 dCi ve 1.3 TCe motorlarda kullanılan EDC yarı otomatik şanzıman, beyin ısınması ve kavrama aşınması nedeniyle vites geçişlerinde sarsıntı yapar.
+* **Arka Amortisör Toz Körükleri**: Süspansiyonlardan gelen gıcırtı ve lokurtu sesleri genellikle amortisör toz körüklerinin yerinden çıkması veya patlamasından kaynaklanır.
+* **R-Link Ekran Donmaları**: Multimedya ekranının donması, Bluetooth bağlantı kopmaları ve geri görüş kamerasının geç açılması yazılımsal olarak yaygındır. Güncellenmesi gerekir.`,
+    created_at: '',
+    models: { id: '501', brand_id: '5', name: 'Megane', slug: 'megane', created_at: '', brands: mockBrands[4] }
+  },
+  {
+    id: '5002',
+    model_id: '502',
+    name: 'Clio IV',
+    slug: 'clio-4',
+    years: '2012 - 2020',
+    engines: [
+      { name: '1.5 dCi (1.5L 75hp/90hp Turbo Dizel)', fuel: 'Dizel', consumption: '3.7L/100km' },
+      { name: '0.9 TCe (0.9L 90hp Üç Silindir Turbo)', fuel: 'Benzin', consumption: '4.9L/100km' },
+      { name: '1.2 16V (1.2L 75hp Atmosferik)', fuel: 'Benzin/LPG', consumption: '5.6L/100km' }
+    ],
+    buying_guide: `### Clio 4 Alırken Dikkat Edilmesi Gerekenler
+* **Rüzgar Sesi Alması**: Yan aynalardan ve kapı fitillerinden dolayı 90 km/s hızın üzerinde içeriye yoğun rüzgar sesi girmesi Clio 4'lerde en yaygın şikayettir.
+* **Far Sararması**: Farların plastik malzeme kalitesi nedeniyle güneş altında kalan araçlarda çok hızlı sararma ve kararma yapar.
+* **Ön Takım Z Rotları**: Kasislerden geçerken gelen tıkırtı sesi genellikle çabuk aşınan Z rotları ve rotillerden kaynaklanır. Değişimi ucuzdur.`,
+    created_at: '',
+    models: { id: '502', brand_id: '5', name: 'Clio', slug: 'clio', created_at: '', brands: mockBrands[4] }
   }
 ]
 
@@ -150,6 +204,22 @@ export const mockReviews: Review[] = [
     created_at: '2026-06-05T09:15:00Z',
     profiles: mockProfiles[2],
     comments_count: 0
+  },
+  {
+    id: 'r4',
+    generation_id: '3001',
+    user_id: 'u4',
+    rating_engine: 3,
+    rating_gearbox: 3,
+    rating_electric: 4,
+    rating_fuel: 4,
+    rating_comfort: 4,
+    rating_parts: 3,
+    rating_mechanic: 4,
+    content: 'A4 B8 Kasa 2.0 TDI sahibiyim. Yürüyeni aşırı sessiz ve tok bir araba. Konfor olarak Mercedes kadar olmasa da BMW den daha yumuşak. Multitronic şanzıman konforlu ama hızlanmalarda çok cansız hissettiriyor. Motorun yağ eksiltme olayını mutlaka takip edin, segman istiyor genelde bu yaşlarda.',
+    created_at: '2026-06-08T11:00:00Z',
+    profiles: mockProfiles[3],
+    comments_count: 0
   }
 ]
 
@@ -158,7 +228,9 @@ export const mockProblemReports: ProblemReport[] = [
   { id: 'p2', generation_id: '1001', title: 'Valvetronic Yağ Yakma', description: 'Atmosferik 320i motorlarında subap lastiklerinin ömrünü tamamlayarak yağ sızdırması.', created_at: '', yes_votes: 32, no_votes: 5 },
   { id: 'p3', generation_id: '1002', title: 'N13 Su Flanşları Kaçağı', description: '1.6 turbo benzinli modellerde plastik su borularının aşırı sıcaklık nedeniyle gevreyip çatlaması.', created_at: '', yes_votes: 58, no_votes: 18 },
   { id: 'p4', generation_id: '1002', title: 'Direksiyon Kutusu Tıkırtısı', description: 'Parke taşlı yollarda direksiyon milinden gelen rahatsız edici ses.', created_at: '', yes_votes: 42, no_votes: 22 },
-  { id: 'p5', generation_id: '2001', title: 'Eksantrik Dişlileri Aşınması', description: 'M271 Kompressör motorlarda eksantrik dişlisinin aşınarak soğuk startta ses yapması.', created_at: '', yes_votes: 38, no_votes: 9 }
+  { id: 'p5', generation_id: '2001', title: 'Eksantrik Dişlileri Aşınması', description: 'M271 Kompressör motorlarda eksantrik dişlisinin aşınarak soğuk startta ses yapması.', created_at: '', yes_votes: 38, no_votes: 9 },
+  { id: 'p6', generation_id: '3001', title: 'TFSI Yağ Segman Hatası', description: 'TFSI motorlarda segmanların aşınması sonucu her 1000km de yarım litreye yakın yağ tüketimi.', created_at: '', yes_votes: 61, no_votes: 4 },
+  { id: 'p7', generation_id: '5001', title: 'EDC Şanzıman Isınması', description: 'Trafikte EDC beyninin aşırı ısınıp şanzıman kutusunu kilitlemesi.', created_at: '', yes_votes: 27, no_votes: 12 }
 ]
 
 export const mockComments: Comment[] = [

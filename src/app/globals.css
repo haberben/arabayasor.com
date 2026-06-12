@@ -3,52 +3,79 @@
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  
   --card: #ffffff;
   --card-foreground: #0f172a;
-  --border: #e2e8f0;
+  
+  --border: #f1f5f9;
+  --border-hover: #e2e8f0;
+  
   --muted: #64748b;
   --muted-foreground: #94a3b8;
+  
   --accent: #2563eb;
   --accent-hover: #1d4ed8;
   --accent-foreground: #ffffff;
+  
   --primary: #0f172a;
   --primary-foreground: #f8fafc;
-  --warning: #f59e0b;
+  
+  --warning: #eab308;
   --success: #10b981;
   --danger: #ef4444;
+
+  --card-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --hover-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
 }
 
 .dark {
-  --background: #090d16;
-  --foreground: #f8fafc;
-  --card: #111827;
-  --card-foreground: #f8fafc;
-  --border: #1e293b;
+  --background: #090b11;
+  --foreground: #f1f5f9;
+  
+  --card: #11141d;
+  --card-foreground: #f1f5f9;
+  
+  --border: #1d2230;
+  --border-hover: #262c3e;
+  
   --muted: #94a3b8;
   --muted-foreground: #475569;
+  
   --accent: #3b82f6;
-  --accent-hover: #2563eb;
-  --accent-foreground: #090d16;
-  --primary: #f8fafc;
-  --primary-foreground: #0f172a;
+  --accent-hover: #60a5fa;
+  --accent-foreground: #090b11;
+  
+  --primary: #f1f5f9;
+  --primary-foreground: #090b11;
+  
   --warning: #fbbf24;
   --success: #34d399;
   --danger: #f87171;
+
+  --card-shadow: 0 15px 35px -12px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --hover-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
 }
 
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  
   --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+  
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-foreground: var(--accent-foreground);
+  
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  
   --color-warning: var(--warning);
   --color-success: var(--success);
   --color-danger: var(--danger);
@@ -57,32 +84,48 @@
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
 }
 
-/* Base resets & styles */
+/* Global resets & animations */
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  letter-spacing: -0.01em;
+  transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Custom UI helper classes */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+/* Premium Card Design styles */
+.premium-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dark .glass-panel {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.premium-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover);
+  box-shadow: var(--hover-shadow);
+}
+
+.glass-badge {
+  background: rgba(37, 99, 235, 0.05);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  color: var(--accent);
+  border-radius: 9999px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.dark .glass-badge {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  color: var(--accent);
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -91,7 +134,7 @@ body {
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 99px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {

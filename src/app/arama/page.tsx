@@ -71,6 +71,37 @@ function CarSilhouette({ brand }: { brand: string }) {
   )
 }
 
+const getCardTags = (genSlug: string) => {
+  const slug = genSlug.toLowerCase()
+  if (slug === 'f30') {
+    return [
+      { type: 'warning', label: 'Turbo Riski' },
+      { type: 'warning', label: 'Zincir Uzaması' }
+    ]
+  }
+  if (slug === 'e90') {
+    return [
+      { type: 'warning', label: 'Yağ Eksiltme' },
+      { type: 'warning', label: 'Zincir Sesi' }
+    ]
+  }
+  if (slug === 'w204') {
+    return [
+      { type: 'warning', label: 'Zincir & Dişli' },
+      { type: 'success', label: 'Lüks Konfor' }
+    ]
+  }
+  if (slug === 'megane-4' || slug === 'clio-4') {
+    return [
+      { type: 'warning', label: 'Şanzıman Isınması' },
+      { type: 'success', label: 'Düşük Tüketim' }
+    ]
+  }
+  return [
+    { type: 'success', label: 'Sorunsuz Sürüş' }
+  ]
+}
+
 export default function SearchPage() {
   // Filters States
   const [selectedBrand, setSelectedBrand] = useState('')
@@ -83,6 +114,9 @@ export default function SearchPage() {
   // Expand State
   const [expandedGenId, setExpandedGenId] = useState<string | null>(null)
   const [expandedTab, setExpandedTab] = useState<'problems' | 'reviews' | 'analysis' | 'proscons' | 'parts'>('problems')
+
+  // Compare State
+  const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
 
   // Dynamic Models list based on selected brand
   const filteredModels = selectedBrand
@@ -342,17 +376,58 @@ export default function SearchPage() {
                           <span className="rounded-full bg-accent/15 text-accent px-2.5 py-0.5 text-[10px] font-black tracking-wide">
                             {gen.years}
                           </span>
-                          <h2 className="text-xl font-black mt-2 text-foreground/95">
-                            {brandObj?.name} {modelObj?.name} {gen.name}
-                          </h2>
-                          <div className="flex items-center justify-center md:justify-start gap-1.5 mt-2">
-                            <div className="flex text-warning">
-                              {[...Array(5)].map((_, i) => (
-                                <Star key={i} className={`h-3.5 w-3.5 ${i < Math.round(parseFloat(avgRating)) ? 'fill-current' : 'text-muted-foreground/20'}`} />
+                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mt-2">
+                            <h2 className="text-xl font-black text-foreground/95">
+                              {brandObj?.name} {modelObj?.name} {gen.name}
+                            </h2>
+                            <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                              <input 
+                                type="checkbox"
+                                checked={selectedCompareIds.includes(gen.id)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedCompareIds(prev => [...prev, gen.id])
+                                  } else {
+                                    setSelectedCompareIds(prev => prev.filter(id => id !== gen.id))
+                                  }
+                                }}
+                                className="w-3.5 h-3.5 rounded border-border-low text-primary focus:ring-0" 
+                              />
+                              <span className="text-caption text-on-surface-variant">Karşılaştır</span>
+                            </label>
+                          </div>
+                          <div className="flex flex-col md:flex-row md:items-center gap-4 mt-2">
+                            <div className="flex items-center justify-center md:justify-start gap-1.5">
+                              <div className="flex text-trust-green">
+                                {[...Array(5)].map((_, i) => (
+                                  <span 
+                                    key={i} 
+                                    className="material-symbols-outlined text-[16px]" 
+                                    style={{ fontVariationSettings: i < Math.round(parseFloat(avgRating)) ? "'FILL' 1" : "'FILL' 0" }}
+                                  >
+                                    star
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="text-xs font-bold text-foreground/85">{avgRating} Puan</span>
+                              <span className="text-[10px] text-muted-foreground font-semibold">({genReviews.length} İnceleme)</span>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                              {getCardTags(gen.slug).map((tag, idx) => (
+                                <span 
+                                  key={idx} 
+                                  className={`px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 ${
+                                    tag.type === 'warning' 
+                                      ? 'bg-error-container text-on-error-container' 
+                                      : 'bg-success/10 text-trust-green border border-success/15'
+                                  }`}
+                                >
+                                  <span className="material-symbols-outlined text-[12px]">{tag.type === 'warning' ? 'warning' : 'check_circle'}</span>
+                                  {tag.label}
+                                </span>
                               ))}
                             </div>
-                            <span className="text-xs font-bold text-foreground/80">{avgRating} Puan</span>
-                            <span className="text-[10px] text-muted-foreground font-semibold">({genReviews.length} İnceleme)</span>
                           </div>
 
                           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-4">
@@ -594,6 +669,27 @@ export default function SearchPage() {
 
         </div>
       </main>
+
+      {selectedCompareIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-primary-container text-on-primary-fixed-variant px-6 py-3 rounded-full shadow-lg flex items-center gap-4 z-40 border border-white/10 transition-all animate-in slide-in-from-bottom-10">
+          <span className="text-xs font-bold text-white">
+            <span className="text-secondary-container font-black">{selectedCompareIds.length}</span> Model Seçildi
+          </span>
+          <div className="h-4 w-[1px] bg-white/20"></div>
+          <Link 
+            href={`/ai-analiz?compare=${selectedCompareIds.join(',')}`}
+            className="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full text-xs font-bold hover:opacity-90 transition-all"
+          >
+            Şimdi Karşılaştır
+          </Link>
+          <button 
+            onClick={() => setSelectedCompareIds([])}
+            className="p-1 hover:bg-white/10 rounded-full text-white/70 hover:text-white"
+          >
+            <span className="material-symbols-outlined text-[18px]">close</span>
+          </button>
+        </div>
+      )}
 
       <Footer />
     </>

@@ -1,312 +1,255 @@
-import React from 'react'
-import { notFound } from 'next/navigation'
-import Link from 'next/link'
+'use client'
+
+import React, { useState } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import { createClient } from '@/lib/supabase-server'
-import { mockProfiles, mockReviews, mockProblemReports } from '@/lib/mock-data'
-import { Profile, Review } from '@/types/database'
-import { Award, ChevronRight, Star, MessageSquare, ShieldAlert, Award as BadgeIcon } from 'lucide-react'
-import type { Metadata, ResolvingMetadata } from 'next'
+import { Sparkles, AlertCircle, Wrench, ShieldAlert, ArrowRight, Star, ChevronRight, HelpCircle, ThumbsUp, ThumbsDown, UserCheck } from 'lucide-react'
+import Link from 'next/link'
 
-interface Props {
-  params: { username: string }
-}
-
-export async function generateMetadata(
-  { params }: Props,
-  parent: ResolvingMetadata
-): Promise<Metadata> {
-  const username = params.username
-  return {
-    title: `@${username} Kullanıcı Profili ve Otomobil Katkıları | arabayasor.com`,
-    description: `@${username} profil seviyesi, kazandığı otomobil uzmanlığı rozetleri, yazdığı incelemeler ve kronik sorun bildirimleri.`,
+interface PageProps {
+  params: {
+    username: string
   }
 }
 
-async function getProfilePageData(username: string) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+export default function ProfilePage({ params }: PageProps) {
+  const { username } = params
 
-  if (!supabaseUrl || !supabaseKey) {
-    const profile = mockProfiles.find(p => p.username === username)
-    if (!profile) return null
-
-    const reviews = mockReviews.filter(r => r.user_id === profile.id)
-    const badges = [
-      { name: 'İlk Adım', description: 'Platformda ilk araç incelemesini yazdı.', icon: 'CheckCircle' },
-      { name: 'Sosyal Kelebek', description: 'Yazılan incelemelere 10 veya daha fazla yorum yaptı.', icon: 'MessageSquare' }
-    ]
-
-    return { profile, reviews, badges }
+  // Mock data representing Usta Selim Y.
+  const profile = {
+    username: username === 'usta-selim-y' ? 'usta_selim_y' : username,
+    fullName: username === 'usta-selim-y' ? 'Selim Yılmaz (Usta)' : `@${username}`,
+    role: 'Master Usta',
+    avatarUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCzux_x7eQ2SOEtqUmwU6lMlvrggFSs5lU79OmrrgDmDBLp9x_sy0hKs86kfJp1rF9X_irH35hDzBYe9HAxm6MWJkUyMJKTZc-aNXRCysBuq9uoPTiGh1XJ8V-9h7LnphCbkEYNWi0k6RCgejWE3aZTgpMn55z0Qw3H3Q00iM-RTBrCb4ZL1v1ip2zrHoJT2jmUYi2mjU01B4XG8Xdi9KB_LkoGahl8jfFQvBkuwiYlpPqERfVOG4EU0WqkWoWoK6wObOINi70f0qM',
+    bio: '20 yılı aşkın otomotiv mekanik tecrübesi ile topluluğumuza teknik analizler ve kronik sorun çözümleri ile katkı sağlamaktadır.',
+    trustPoints: '14.250',
+    helpfulReviews: 118,
+    topContributorRank: '#12',
+    progressPct: 85,
+    pointsLeft: 750,
+    nextRank: 'Efsane Usta',
+    currentRank: 'Master Usta'
   }
 
-  try {
-    const supabase = await createClient()
-
-    // 1. Profili kullanıcı adına göre bul
-    const { data: profile, error: pErr } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', username)
-      .single()
-
-    if (pErr || !profile) {
-      // Fallback local lookup
-      const local = mockProfiles.find(p => p.username === username)
-      if (!local) return null
-      return {
-        profile: local,
-        reviews: mockReviews.filter(r => r.user_id === local.id),
-        badges: [
-          { name: 'İlk Adım', description: 'Platformda ilk araç incelemesini yazdı.', icon: 'CheckCircle' }
-        ]
-      }
+  const badges = [
+    {
+      name: 'BMW Specialist',
+      desc: '42 Doğrulanmış Onarım',
+      icon: 'directions_car',
+      color: 'text-secondary-container bg-secondary-container/10'
+    },
+    {
+      name: '100+ Helpful Reviews',
+      desc: 'Topluluk Tercihi',
+      icon: 'recommend',
+      color: 'text-trust-green bg-trust-green/10'
+    },
+    {
+      name: 'Technical Contributor',
+      desc: 'Yüksek Etkili Yazar',
+      icon: 'engineering',
+      color: 'text-primary-container bg-primary-container/10'
+    },
+    {
+      name: 'Founding Member',
+      desc: 'Ocak 2024\'ten Beri',
+      icon: 'workspace_premium',
+      color: 'text-warning-red bg-warning-red/10'
     }
+  ]
 
-    // 2. İncelemelerini çek
-    const { data: reviews } = await supabase
-      .from('reviews')
-      .select('*, generations(*, models(*, brands(*)))')
-      .eq('user_id', profile.id)
-      .order('created_at', { ascending: false })
-
-    // 3. Rozetlerini çek
-    const { data: userBadges } = await supabase
-      .from('user_badges')
-      .select('*, badges(*)')
-      .eq('user_id', profile.id)
-
-    const badges = (userBadges || []).map(ub => ub.badges).filter(Boolean)
-
-    return {
-      profile: profile as Profile,
-      reviews: reviews || [],
-      badges: badges.length > 0 ? badges : [
-        { name: 'İlk Adım', description: 'Platformda ilk araç incelemesini yazdı.', icon: 'CheckCircle' }
-      ]
+  const contributions = [
+    {
+      title: 'BMW 3 Series (F30) - Timing Chain Chronic Issue Analysis',
+      date: '2 gün önce eklendi',
+      category: 'Teknik Rehber',
+      impact: '+450',
+      appreciations: '24'
+    },
+    {
+      title: 'Doğrulanmış İnceleme: Audi A4 2.0 TDI Motor Ömrü',
+      date: '1 hafta önce eklendi',
+      category: 'Kullanıcı İncelemesi',
+      impact: '+120',
+      appreciations: '12'
+    },
+    {
+      title: 'Hata Bildirimi: Mobil Safari Filtreleme Glitch\'i',
+      date: '2 hafta önce çözüldü',
+      category: 'Topluluk Desteği',
+      impact: '+80',
+      appreciations: 'Çözüldü'
     }
-  } catch (err) {
-    console.error('Failed to fetch profile page data:', err)
-    const local = mockProfiles.find(p => p.username === username)
-    if (!local) return null
-    return {
-      profile: local,
-      reviews: mockReviews.filter(r => r.user_id === local.id),
-      badges: [
-        { name: 'İlk Adım', description: 'Platformda ilk araç incelemesini yazdı.', icon: 'CheckCircle' }
-      ]
-    }
-  }
-}
-
-export default async function ProfilePage({ params }: Props) {
-  const data = await getProfilePageData(params.username)
-
-  if (!data) {
-    notFound()
-  }
-
-  const { profile, reviews, badges } = data
-
-  // XP'ye göre bir sonraki seviye ve bar hesabı
-  let nextRole = 'Efsane Usta'
-  let prevThreshold = 0
-  let nextThreshold = 2000
-  let currentXp = profile.xp || 0
-
-  if (currentXp < 100) {
-    nextRole = 'Aktif Üye'
-    prevThreshold = 0
-    nextThreshold = 100
-  } else if (currentXp < 300) {
-    nextRole = 'Uzman Kullanıcı'
-    prevThreshold = 100
-    nextThreshold = 300
-  } else if (currentXp < 600) {
-    nextRole = 'Usta'
-    prevThreshold = 300
-    nextThreshold = 600
-  } else if (currentXp < 1000) {
-    nextRole = 'Master Usta'
-    prevThreshold = 600
-    nextThreshold = 1000
-  } else if (currentXp < 2000) {
-    nextRole = 'Efsane Usta'
-    prevThreshold = 1000
-    nextThreshold = 2000
-  } else {
-    nextRole = 'Maksimum Seviye'
-    prevThreshold = 2000
-    nextThreshold = 2000
-  }
-
-  const xpProgress = nextThreshold > prevThreshold 
-    ? Math.min(Math.round(((currentXp - prevThreshold) / (nextThreshold - prevThreshold)) * 100), 100)
-    : 100
-
-  // Yıldız çizme yardımcısı
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-0.5 text-warning">
-        {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i} 
-            className={`h-3 w-3 ${i < rating ? 'fill-current' : 'text-muted-foreground/30'}`} 
-          />
-        ))}
-      </div>
-    )
-  }
+  ]
 
   return (
     <>
       <Navbar />
 
-      <main className="flex-1 py-12 bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8">
+        
+        {/* Left SideNav Filters */}
+        <aside className="hidden lg:flex flex-col p-4 gap-4 bg-surface-container-low h-fit sticky top-24 rounded-2xl border border-border-low">
+          <div className="flex items-center gap-3 mb-2 border-b border-border/60 pb-3">
+            <span className="material-symbols-outlined text-primary">filter_list</span>
+            <div>
+              <h3 className="font-title-md text-sm font-bold text-on-surface">Detaylı Filtreler</h3>
+              <p className="font-label-md text-[10px] text-muted">Sonuçları daraltın</p>
+            </div>
+          </div>
+          <nav className="space-y-1 text-xs">
+            <a className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant transition-all rounded-lg font-bold" href="#">
+              <span className="material-symbols-outlined text-sm">calendar_today</span> Model Yılı
+            </a>
+            <a className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant transition-all rounded-lg font-bold" href="#">
+              <span className="material-symbols-outlined text-sm">ev_station</span> Yakıt Tipi
+            </a>
+            <a className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant transition-all rounded-lg font-bold" href="#">
+              <span className="material-symbols-outlined text-sm">settings_input_component</span> Şanzıman
+            </a>
+            <a className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant transition-all rounded-lg font-bold" href="#">
+              <span className="material-symbols-outlined text-sm">enable</span> Motor Hacmi
+            </a>
+            <a className="flex items-center gap-3 p-3 text-on-surface-variant hover:bg-surface-variant transition-all rounded-lg font-bold" href="#">
+              <span className="material-symbols-outlined text-sm">settings_input_antenna</span> Çekiş Tipi
+            </a>
+          </nav>
+          <button className="mt-4 w-full bg-secondary-container text-on-secondary-container text-xs py-3 rounded-xl font-bold hover:scale-[0.98] transition-all">
+            Filtreleri Uygula
+          </button>
+        </aside>
+
+        {/* Right Main Content */}
+        <div className="space-y-8">
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            {/* Sol Sütun: Profil Kartı ve Seviye */}
-            <div className="lg:col-span-1 space-y-6">
+          {/* 1. Profile Header Card */}
+          <section className="bg-white p-8 rounded-3xl border border-border shadow-sm relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center md:items-start gap-8 relative z-10">
+              <div className="relative shrink-0">
+                <div className="w-32 h-32 rounded-full border-4 border-secondary-container overflow-hidden bg-slate-100">
+                  <img alt={profile.fullName} className="w-full h-full object-cover" src={profile.avatarUrl} />
+                </div>
+                <div className="absolute -bottom-2 -right-2 bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-md">
+                  <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+                  <span>Usta</span>
+                </div>
+              </div>
               
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm text-center relative overflow-hidden">
-                <div className="absolute top-0 left-0 right-0 h-2 bg-accent"></div>
-                
-                <div className="mx-auto mt-4 flex h-20 w-20 items-center justify-center rounded-full bg-accent/10 text-accent font-black text-3xl shadow-inner border border-accent/20">
-                  {profile.username[0].toUpperCase()}
+              <div className="flex-1 text-center md:text-left">
+                <div className="flex flex-col md:flex-row md:items-center gap-4 mb-2">
+                  <h1 className="text-2xl font-black text-on-surface">@{profile.username}</h1>
+                  <span className="bg-primary-container text-white px-4 py-1 rounded-full text-xs font-bold w-fit mx-auto md:mx-0">
+                    {profile.role}
+                  </span>
                 </div>
+                <p className="text-muted text-xs leading-relaxed max-w-xl mb-6">
+                  {profile.bio}
+                </p>
                 
-                <h2 className="text-xl font-black mt-4">@{profile.username}</h2>
-                <p className="text-xs text-muted-foreground mt-1">{profile.full_name}</p>
-
-                <div className="mt-4 inline-flex items-center gap-1 bg-accent/15 text-accent px-3 py-1 rounded-full text-xs font-black">
-                  <Award className="h-4 w-4" />
-                  {profile.role}
-                </div>
-
-                {/* Seviye Barı */}
-                <div className="mt-8 border-t border-border/50 pt-6 text-left">
-                  <div className="flex justify-between text-xs font-bold text-foreground/80 mb-2">
-                    <span>Katkı Seviyesi</span>
-                    <span>{currentXp} XP</span>
+                <div className="flex flex-wrap justify-center md:justify-start gap-6 border-t border-border/60 pt-6">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Güven Puanı</span>
+                    <span className="text-2xl font-black text-trust-green">{profile.trustPoints}</span>
                   </div>
-                  
-                  {/* SVG Bar */}
-                  <div className="h-2.5 w-full bg-border rounded-full overflow-hidden">
-                    <div 
-                      className="bg-accent h-full rounded-full transition-all duration-700"
-                      style={{ width: `${xpProgress}%` }}
-                    ></div>
+                  <div className="w-px h-12 bg-border hidden md:block"></div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Yardımcı İncelemeler</span>
+                    <span className="text-2xl font-black text-foreground">{profile.helpfulReviews}</span>
                   </div>
-                  
-                  <div className="flex justify-between text-[10px] text-muted font-semibold mt-2">
-                    <span>Mevcut: {profile.role}</span>
-                    {nextThreshold > currentXp ? (
-                      <span>Sonraki: {nextRole} (%{xpProgress})</span>
-                    ) : (
-                      <span>Zirve Seviye!</span>
-                    )}
+                  <div className="w-px h-12 bg-border hidden md:block"></div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Katkı Sıralaması</span>
+                    <span className="text-2xl font-black text-foreground">{profile.topContributorRank}</span>
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
 
-              {/* Kazanılan Rozetler */}
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-                <h3 className="text-sm font-black uppercase tracking-wider text-foreground/80 mb-4 flex items-center gap-2">
-                  <BadgeIcon className="h-4.5 w-4.5 text-warning" />
-                  Kazanılan Rozetler ({badges.length})
-                </h3>
-                
-                <div className="grid grid-cols-1 gap-3">
-                  {badges.map((badge, idx) => (
-                    <div key={idx} className="flex items-center gap-3 p-3 rounded-2xl bg-background border border-border/80">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-warning/10 text-warning text-sm">
-                        🎖️
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold">{badge.name}</h4>
-                        <p className="text-[10px] text-muted mt-0.5 leading-snug">{badge.description}</p>
+          {/* 2. Rank Progress Section */}
+          <section className="bg-white p-8 rounded-3xl border border-border shadow-sm">
+            <div className="flex justify-between items-end mb-4 text-xs font-bold">
+              <div>
+                <h2 className="text-sm font-black text-foreground">Üyelik Seviye İlerlemesi</h2>
+                <p className="text-muted mt-0.5">Bir sonraki seviye: <span className="text-secondary font-bold">{profile.nextRank}</span></p>
+              </div>
+              <span className="text-muted">{profile.pointsLeft} Puan Kaldı</span>
+            </div>
+            
+            <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-accent to-[#ffddb8] rounded-full transition-all duration-500" 
+                style={{ width: `${profile.progressPct}%` }}
+              ></div>
+            </div>
+            
+            <div className="flex justify-between mt-3 text-[10px] font-bold">
+              <span className="text-muted-foreground">{profile.currentRank}</span>
+              <span className="text-foreground">%{profile.progressPct} Tamamlandı</span>
+              <span className="text-secondary">{profile.nextRank}</span>
+            </div>
+          </section>
+
+          {/* 3. Badges Gallery */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-black text-on-surface">Uzmanlık Rozetleri</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {badges.map((badge, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-3xl border border-border text-center flex flex-col items-center hover:border-secondary-container transition-all cursor-default shadow-sm">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${badge.color}`}>
+                    <span className="material-symbols-outlined text-[28px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      {badge.icon}
+                    </span>
+                  </div>
+                  <h3 className="text-xs font-black text-foreground mb-1">{badge.name}</h3>
+                  <p className="text-[10px] text-muted">{badge.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. Contribution History */}
+          <section className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-black text-on-surface">Katkı Geçmişi</h2>
+              <button className="text-secondary font-bold text-xs flex items-center gap-1 hover:underline">
+                Tümünü Gör <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {contributions.map((item, idx) => (
+                <div key={idx} className="bg-white border border-border rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 hover:shadow-md transition-all shadow-sm">
+                  <div className="flex gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-border/40 flex items-center justify-center shrink-0">
+                      <span className="material-symbols-outlined text-primary">article</span>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-foreground mb-1 leading-snug">{item.title}</h4>
+                      <div className="flex items-center gap-3 text-[10px] text-muted">
+                        <span>{item.date}</span>
+                        <span>•</span>
+                        <span className="bg-slate-100 px-2 py-0.5 rounded text-foreground font-bold">{item.category}</span>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Sağ Sütun: Yazılan İncelemeler */}
-            <div className="lg:col-span-2 space-y-6">
-              
-              <div className="flex items-center gap-2 mb-2">
-                <MessageSquare className="h-5 w-5 text-accent" />
-                <h3 className="text-lg font-black">Yazılan Araç İncelemeleri ({reviews.length})</h3>
-              </div>
-
-              <div className="space-y-6">
-                {reviews.length > 0 ? (
-                  reviews.map((rev: any) => {
-                    const avg = ((
-                      rev.rating_engine + 
-                      rev.rating_gearbox + 
-                      rev.rating_electric + 
-                      rev.rating_fuel + 
-                      rev.rating_comfort + 
-                      rev.rating_parts + 
-                      rev.rating_mechanic
-                    ) / 7).toFixed(1)
-
-                    const brandName = rev.generations?.models?.brands?.name || 'BMW'
-                    const modelName = rev.generations?.models?.name || '3 Serisi'
-                    const genName = rev.generations?.name || 'E90'
-
-                    return (
-                      <div 
-                        key={rev.id}
-                        className="rounded-3xl border border-border bg-card p-6 hover:shadow-md transition-shadow flex flex-col"
-                      >
-                        <div className="flex justify-between items-start mb-4">
-                          <div>
-                            <span className="text-xs font-bold text-foreground">
-                              {brandName} {modelName} {genName}
-                            </span>
-                            <div className="flex items-center gap-1.5 mt-1">
-                              {renderStars(Math.round(parseFloat(avg)))}
-                              <span className="text-xs font-black text-foreground">{avg}</span>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground font-semibold">
-                            {new Date(rev.created_at || '2026-06-12').toLocaleDateString('tr-TR')}
-                          </span>
-                        </div>
-
-                        <p className="text-xs text-muted leading-relaxed line-clamp-3">
-                          "{rev.content}"
-                        </p>
-
-                        <div className="mt-4 pt-4 border-t border-border/50 flex justify-end">
-                          <Link
-                            href={`/arac/${rev.generations?.models?.brands?.slug}/${rev.generations?.models?.slug}/${rev.generations?.slug}`}
-                            className="inline-flex items-center gap-1 text-[10px] font-bold text-accent hover:underline"
-                          >
-                            Aracın Tüm Detayları ve Oylamaları Gör
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          </Link>
-                        </div>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <div className="text-center py-12 border border-dashed border-border rounded-3xl text-xs text-muted">
-                    Bu kullanıcı henüz herhangi bir araç incelemesi yazmamış.
                   </div>
-                )}
-              </div>
-
+                  
+                  <div className="flex items-center gap-6 shrink-0 w-full md:w-auto justify-between border-t md:border-t-0 pt-4 md:pt-0 border-border/40 text-xs font-bold">
+                    <div className="flex flex-col items-center">
+                      <span className="text-trust-green">{item.impact}</span>
+                      <span className="text-[10px] text-muted font-normal">Etki</span>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <span className="text-foreground">{item.appreciations}</span>
+                      <span className="text-[10px] text-muted font-normal">
+                        {item.appreciations === 'Çözüldü' ? 'Durum' : 'Beğeni'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-
-          </div>
+          </section>
 
         </div>
       </main>

@@ -75,20 +75,20 @@ export default async function HomePage() {
       <main className="flex-1">
         
         {/* PREMIUM HERO SECTION */}
-        <section className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#090b11] via-[#0e121d] to-background text-white overflow-hidden text-center">
+        <section className="relative py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#09090b] via-[#121214] to-background text-white overflow-hidden text-center">
           {/* Subtle light ambient glow */}
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[250px] bg-[#d4b27a]/5 rounded-full blur-[120px] pointer-events-none"></div>
           
           <div className="mx-auto max-w-4xl relative z-10">
             
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/5 border border-blue-500/10 px-4 py-1.5 text-[11px] font-bold text-accent tracking-wide mb-6">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-accent/5 border border-accent/15 px-4 py-1.5 text-[11px] font-bold text-accent tracking-wide mb-6">
               <Activity className="h-3.5 w-3.5" />
               Topluluk Tabanlı Otomobil Kılavuzu & Puanlama
             </div>
 
             <h1 className="text-4xl font-black tracking-tight sm:text-6xl max-w-3xl mx-auto leading-[1.15] text-foreground">
               Araba Almadan Önce <br />
-              <span className="bg-gradient-to-r from-blue-400 via-indigo-300 to-blue-500 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-[#e5c99b] via-[#d4b27a] to-[#a37d4c] bg-clip-text text-transparent">
                 Kullananlara Sorun!
               </span>
             </h1>

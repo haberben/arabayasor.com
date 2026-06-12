@@ -210,8 +210,8 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex items-center gap-8">
             <Link href="/" className="flex items-center gap-2">
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-2xl font-black tracking-tight text-transparent dark:from-blue-400 dark:to-indigo-300">
-                arabayasor<span className="text-blue-600 dark:text-blue-400">.com</span>
+              <span className="bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-2xl font-black tracking-tight text-transparent">
+                arabayasor<span className="text-[#a37d4c] dark:text-[#d4b27a]">.com</span>
               </span>
             </Link>
 

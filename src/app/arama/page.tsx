@@ -17,7 +17,7 @@ function CarSilhouette({ brand }: { brand: string }) {
   const brandLower = brand.toLowerCase()
   if (brandLower.includes('bmw')) {
     return (
-      <svg className="w-full h-32 text-blue-500/25 bg-blue-500/5 dark:bg-blue-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
+      <svg className="w-full h-32 text-accent/25 bg-accent/5 dark:bg-accent/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
         <path d="M10,38 C20,38 22,35 30,35 C38,35 40,22 55,20 C70,18 78,30 84,33 C90,35 92,38 94,38 L94,42 L10,42 Z" fill="currentColor" />
         <circle cx="28" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
         <circle cx="74" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
@@ -28,7 +28,7 @@ function CarSilhouette({ brand }: { brand: string }) {
   }
   if (brandLower.includes('mercedes')) {
     return (
-      <svg className="w-full h-32 text-slate-500/25 bg-slate-500/5 dark:bg-slate-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
+      <svg className="w-full h-32 text-stone-400/25 bg-stone-500/5 dark:bg-stone-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
         <path d="M8,36 C18,36 24,34 32,34 C40,34 45,21 58,19 C71,17 76,28 84,32 C92,34 94,36 96,36 L96,41 L8,41 Z" fill="currentColor" />
         <circle cx="26" cy="39" r="6" fill="#1e293b" stroke="currentColor" stroke-width="2" />
         <circle cx="76" cy="39" r="6" fill="#1e293b" stroke="currentColor" stroke-width="2" />
@@ -39,7 +39,7 @@ function CarSilhouette({ brand }: { brand: string }) {
   }
   if (brandLower.includes('audi')) {
     return (
-      <svg className="w-full h-32 text-zinc-500/25 bg-zinc-500/5 dark:bg-zinc-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
+      <svg className="w-full h-32 text-zinc-400/25 bg-zinc-500/5 dark:bg-zinc-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
         <path d="M12,37 C22,37 25,34 33,34 C41,34 42,20 54,19 C66,18 76,28 82,31 C88,33 90,37 92,37 L92,41 L12,41 Z" fill="currentColor" />
         <circle cx="30" cy="39" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
         <circle cx="72" cy="39" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
@@ -50,7 +50,7 @@ function CarSilhouette({ brand }: { brand: string }) {
   }
   if (brandLower.includes('toyota')) {
     return (
-      <svg className="w-full h-32 text-red-500/20 bg-red-500/5 dark:bg-red-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
+      <svg className="w-full h-32 text-stone-300/20 bg-stone-500/5 dark:bg-stone-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
         <path d="M10,38 C18,38 22,35 29,35 C36,35 39,23 51,22 C63,21 73,29 79,33 C85,35 88,38 90,38 L90,42 L10,42 Z" fill="currentColor" />
         <circle cx="28" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
         <circle cx="70" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
@@ -61,7 +61,7 @@ function CarSilhouette({ brand }: { brand: string }) {
   }
   // Default/Renault
   return (
-    <svg className="w-full h-32 text-yellow-500/20 bg-yellow-500/5 dark:bg-yellow-500/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
+    <svg className="w-full h-32 text-accent/20 bg-accent/5 dark:bg-accent/10 rounded-2xl p-4 transition-transform duration-300 group-hover:scale-105" viewBox="0 0 100 50">
       <path d="M12,38 C20,38 24,35 30,35 C36,35 40,24 50,23 C60,22 70,30 76,33 C82,35 84,38 86,38 L86,42 L12,42 Z" fill="currentColor" />
       <circle cx="28" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />
       <circle cx="68" cy="40" r="5.5" fill="#1e293b" stroke="currentColor" stroke-width="2" />

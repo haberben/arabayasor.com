@@ -161,11 +161,7 @@ export default async function HomePage() {
                     <img 
                       alt={brand.name} 
                       className="w-12 h-12 mx-auto mb-4 grayscale group-hover:grayscale-0 transition-all object-contain" 
-                      src={localLogo}
-                      onError={(e) => {
-                        // Fallback if logo doesn't exist
-                        e.currentTarget.src = "https://lh3.googleusercontent.com/aida-public/AB6AXuAG0o0dfPguWsaNdUHCddE2nvQfUcx1794MJeRkZSlTP48-nUOGpDrcSfx1p5fH-uAG1FHJkMZI6maSsX4jk3GJcfrP6u3t7KTGGNbEDSGPsO8Z4v8A_2ggfKMbFOTLug75HTA-lYYna4OBca_B7NT0HUI_hvh5tbg5Tec23nGdizT5ClK6yqFgDOfvatS0y_d43RweYxcv_8RHF-ui3eIJHWUDGQzoGmnsP-GeNLZNu8zEPsM0LXnzeyDBQLaf9mFQ55Enj3ielzA"
-                      }}
+                      src={brand.logo_url || localLogo}
                     />
                     <span className="font-label-md text-label-md text-on-surface">{brand.name}</span>
                   </Link>

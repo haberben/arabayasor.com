@@ -344,148 +344,180 @@ function AiAnalysisContent() {
 
       {/* Rapor Çıktısı (Mockup ve Tema Yapısı) */}
       {!loading && report && (
-        <div className="space-y-8 animate-in fade-in zoom-in-95 duration-200">
-          {/* Breadcrumb & Title */}
-          <div>
-            <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md mb-2">
-              <span>Raporlar</span>
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-              <span>AI Analiz</span>
-            </div>
-            <h1 className="font-headline-lg text-3xl font-black text-foreground tracking-tight">
-              AI İlan Analiz Raporu | {report.detectedBrand} {report.detectedModel} {report.detectedGeneration}
-            </h1>
-          </div>
+        <ReportOutput report={report} />
+      )}
+    </div>
+  )
+}
 
-          {/* Bento Grid Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
-            {/* Risk Level Gauge */}
-            <div className="md:col-span-4 bg-surface-container-low p-6 rounded-xl flex flex-col items-center justify-center relative overflow-hidden border border-border-low">
-              <div className="relative w-32 h-32 mb-4">
-                <svg className="w-full h-full -rotate-90 origin-center" viewBox="0 0 100 100">
-                  <circle className="text-surface-container-highest" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="8"></circle>
-                  <circle className="text-[#fea619] transition-all duration-700" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeDasharray="251.2" strokeDashoffset="125.6" strokeLinecap="round" strokeWidth="8"></circle>
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-xl font-bold text-foreground">{report.riskLevel}</span>
-                </div>
-              </div>
-              <span className="font-label-md text-xs font-bold text-muted uppercase tracking-widest">RİSK SEVİYESİ</span>
-              
-              <div className="absolute top-0 right-0 p-4">
-                <span className="material-symbols-outlined text-warning animate-pulse">priority_high</span>
-              </div>
-            </div>
+function ReportOutput({ report }: { report: any }) {
+  const [dashoffset, setDashoffset] = useState(251.2)
 
-            {/* Vehicle Confirmation Hero */}
-            <div className="md:col-span-8 relative bg-primary-container rounded-xl overflow-hidden min-h-[200px] flex flex-col justify-end p-8">
-              <div className="absolute inset-0 opacity-40 bg-slate-800">
-                {/* Fallback pattern representing car detail background */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-              </div>
-              
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-1 bg-trust-green/20 text-trust-green px-3 py-1 rounded-full text-xs font-bold mb-4">
-                  <span className="material-symbols-outlined text-[14px]">check_circle</span>
-                  <span>Eşleşme Doğrulandı</span>
-                </div>
-                <h2 className="text-white font-headline-lg text-2xl font-black">{report.detectedYear} {report.detectedBrand} {report.detectedModel} ({report.engineCode} Motor)</h2>
-                <p className="text-slate-300 text-xs mt-2">İlan linkinden araç özellikleri başarıyla tespit edildi.</p>
-                
-                <div className="flex gap-4 mt-6">
-                  <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 text-xs">
-                    <span className="block text-slate-300">Kasa Kodu</span>
-                    <span className="text-white font-bold">{report.chassis}</span>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10 text-xs">
-                    <span className="block text-slate-300">Motor Kodu</span>
-                    <span className="text-white font-bold">{report.engineCode}</span>
-                  </div>
-                </div>
-              </div>
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDashoffset(125.6) // Animate to Medium (~50% offset)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-200">
+      {/* Breadcrumb & Title */}
+      <div>
+        <div className="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md mb-2">
+          <span>Raporlar</span>
+          <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+          <span>AI Analizi</span>
+        </div>
+        <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+          AI İlan Analiz Raporu | {report.detectedBrand} {report.detectedModel} {report.detectedGeneration}
+        </h1>
+      </div>
+
+      {/* Bento Grid Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-12">
+        {/* Risk Level Gauge */}
+        <div className="md:col-span-4 bg-surface-container-low p-6 rounded-xl flex flex-col items-center justify-center relative overflow-hidden border border-border-low">
+          <div className="relative w-32 h-32 mb-4">
+            <svg className="gauge-svg w-full h-full -rotate-90 origin-center" viewBox="0 0 100 100">
+              <circle className="text-surface-container-highest" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="8"></circle>
+              <circle 
+                className="text-[#fea619] transition-all duration-700" 
+                cx="50" 
+                cy="50" 
+                fill="transparent" 
+                r="40" 
+                stroke="currentColor" 
+                strokeDasharray="251.2" 
+                strokeDashoffset={dashoffset}
+                strokeLinecap="round" 
+                strokeWidth="8"
+              ></circle>
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <span className="text-title-md font-bold text-on-surface">Orta</span>
             </div>
           </div>
-
-          {/* Top 3 Risks Section */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-black text-foreground">Bu Model İçin En Kritik 3 Risk</h3>
-              <span className="text-warning-red font-bold text-xs flex items-center gap-1">
-                <span className="material-symbols-outlined text-[18px]">report</span> Odaklanılması Önerilir
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {report.criticalRisks.map((risk: any, idx: number) => (
-                <div key={idx} className="border-l-4 border-[#F95A93] bg-orange-50/10 p-6 rounded-r-xl border-y border-r border-border-low hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3 mb-4">
-                    <span className="material-symbols-outlined text-[#F95A93] text-[24px]">
-                      {risk.icon === 'thermostat' ? 'thermostat' : risk.icon === 'oil_barrel' ? 'oil_barrel' : 'bolt'}
-                    </span>
-                    <h4 className="font-label-md text-xs font-black text-foreground">{risk.title}</h4>
-                  </div>
-                  <p className="text-muted text-xs leading-relaxed">{risk.description}</p>
-                  <div className="mt-4">
-                    <span className="px-2 py-0.5 bg-[#F95A93]/10 text-[#F95A93] text-[9px] font-black rounded">{risk.priority}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Market Value Comparison */}
-          <div className="bg-surface-gray rounded-xl p-8 border border-border-low mb-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              <div>
-                <h3 className="text-lg font-black text-foreground mb-1">Piyasa Fiyat Karşılaştırması</h3>
-                <p className="text-muted text-xs">Bu ilandaki fiyatın doğrulanmış topluluk satış ortalamalarıyla kıyaslaması.</p>
-              </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-border-low text-right shrink-0">
-                <span className="block text-muted text-[10px] font-bold">TOPLULUK ORTALAMASI</span>
-                <span className="text-xl font-black text-foreground">{(report.communityAverage).toLocaleString('tr-TR')} TL</span>
-              </div>
-            </div>
-
-            {/* Price Gauge Bar */}
-            <div className="mt-8 relative h-4 bg-slate-200 rounded-full">
-              <div className="absolute left-0 top-0 h-full bg-trust-green rounded-l-full" style={{ width: '45%' }}></div>
-              <div className="absolute top-0 h-full w-2 bg-primary z-10" style={{ left: '65%' }}>
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] px-2 py-1 rounded whitespace-nowrap font-bold shadow">
-                  İlan Fiyatı: {(report.marketPrice).toLocaleString('tr-TR')} TL
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-between mt-3 text-[10px] text-muted-foreground font-bold uppercase">
-              <span>Piyasa Altı</span>
-              <span>Adil Değer</span>
-              <span>Piyasa Üstü</span>
-            </div>
-
-            <div className="mt-6 p-4 bg-red-50 border border-danger/10 rounded-xl flex items-center gap-3">
-              <span className="material-symbols-outlined text-danger">info</span>
-              <p className="text-danger font-semibold text-xs">
-                Bu ilanın fiyatı, aynı konfigürasyondaki topluluk doğrulanmış satış ortalamalarının %{report.percentageAbove} üzerindedir.
-              </p>
-            </div>
-          </div>
-
-          {/* Next Steps */}
-          <div className="flex flex-col md:flex-row gap-6">
-            <button className="flex-1 bg-secondary-container text-on-secondary-container py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 shadow-md">
-              <span className="material-symbols-outlined">support_agent</span>
-              Bir Ustaya Sorun
-            </button>
-            <Link 
-              href={`/arac/bmw/3-series/f30`}
-              className="flex-1 border-2 border-primary-container text-primary-container py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:bg-primary-container hover:text-white transition-all active:scale-95 text-center"
-            >
-              <span className="material-symbols-outlined">menu_book</span>
-              Kasa Rehberini İncele
-            </Link>
+          <span className="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest">Risk Seviyesi</span>
+          
+          <div className="absolute top-0 right-0 p-4">
+            <span className="material-symbols-outlined text-secondary-container animate-pulse">priority_high</span>
           </div>
         </div>
-      )}
+
+        {/* Vehicle Confirmation Hero */}
+        <div className="md:col-span-8 relative bg-primary-container rounded-xl overflow-hidden group min-h-[200px]">
+          <div className="absolute inset-0 opacity-40">
+            <img 
+              className="w-full h-full object-cover grayscale" 
+              alt="BMW F30" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxG8s_CtZKWey24hQs5_0Hfvojc6oNEXxzgTia3u8SRrBB1QlWuAszEhedVofbJIVqLXnvpTUq33zKBwFYdah2PTtvZNCURIkhqwJXveHLR31wTZ_ciKVEz4WbQKOaEFb0FkZBGBAXrPUKjFPgQXfp72olWtV3OQ0d8vAbGSRfoiKl8XR5RNvNU7x7uA0qJrKjmgJuw5My19LnxzeHWxTkfq2YybPX_l0084BMeZtJZIjjrIkULrMJBgorXNN3GdRadR4IV9IYRSM"
+            />
+          </div>
+          <div className="relative z-10 p-8 flex flex-col h-full justify-between">
+            <div>
+              <div className="inline-flex items-center gap-2 bg-trust-green/20 text-trust-green px-3 py-1 rounded-full text-caption mb-4">
+                <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                <span className="font-label-md text-label-md">Araç Doğrulandı</span>
+              </div>
+              <h2 className="text-on-primary font-headline-lg text-headline-lg">{report.detectedYear} {report.detectedBrand} {report.detectedModel} ({report.engineCode} Motor)</h2>
+              <p className="text-on-primary-container font-body-md text-body-md mt-2">İlan linkinden doğru şekilde tespit edildi.</p>
+            </div>
+            
+            <div className="flex gap-4 mt-6">
+              <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
+                <span className="block text-on-primary/60 text-caption font-label-md">Şasi</span>
+                <span className="text-on-primary font-bold">{report.chassis}</span>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
+                <span className="block text-on-primary/60 text-caption font-label-md">Motor Kodu</span>
+                <span className="text-on-primary font-bold">{report.engineCode}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Top 3 Risks Section */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-title-md text-title-md font-bold text-primary">Bu Model İçin En Kritik 3 Risk</h3>
+          <span className="text-warning-red font-label-md text-label-md flex items-center gap-1">
+            <span className="material-symbols-outlined text-[18px]">report</span> Kontrol Önerilir
+          </span>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+          {report.criticalRisks.map((risk: any, idx: number) => (
+            <div key={idx} className="border-l-4 border-warning-red bg-orange-50/30 p-6 rounded-r-xl border-y border-r border-border-low hover:shadow-md transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="material-symbols-outlined text-warning-red text-[24px]">
+                  {risk.icon === 'thermostat' ? 'thermostat' : risk.icon === 'oil_barrel' ? 'oil_barrel' : 'bolt'}
+                </span>
+                <h4 className="font-label-md text-label-md text-on-surface">{risk.title}</h4>
+              </div>
+              <p className="text-on-surface-variant font-body-md text-body-md">{risk.description}</p>
+              <div className="mt-4 flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-warning-red/10 text-warning-red text-caption font-bold rounded">
+                  {risk.priority}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Market Value Comparison */}
+      <div className="bg-surface-gray rounded-xl p-8 border border-border-low mb-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <h3 className="font-title-md text-title-md font-bold text-primary mb-2">Piyasa Değeri Karşılaştırması</h3>
+            <p className="text-on-surface-variant font-body-md text-body-md">Bu ilandaki fiyat, topluluk tarafından doğrulanmış {report.detectedGeneration} satış ortalamasına göre ne durumda?</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-border-low text-right">
+            <span className="block text-on-surface-variant text-caption font-label-md">Topluluk Ortalaması</span>
+            <span className="text-headline-lg font-display-lg text-primary">{(report.communityAverage).toLocaleString('tr-TR')} TL</span>
+          </div>
+        </div>
+
+        {/* Price Slider */}
+        <div className="mt-8 relative h-4 bg-surface-container-highest rounded-full">
+          <div className="absolute left-0 top-0 h-full bg-trust-green rounded-l-full" style={{ width: '45%' }}></div>
+          <div className="absolute top-0 h-full w-2 bg-primary z-10" style={{ left: '65%' }}>
+            <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-white text-caption px-2 py-1 rounded whitespace-nowrap font-bold">
+              İlan Fiyatı: {(report.marketPrice).toLocaleString('tr-TR')} TL
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-between mt-3 text-caption text-on-surface-variant font-label-md">
+          <span>Piyasa Altı</span>
+          <span>Adil Fiyat</span>
+          <span>Piyasa Üstü</span>
+        </div>
+
+        <div className="mt-6 p-4 bg-error-container/20 border border-error-container/30 rounded-lg flex items-center gap-3">
+          <span className="material-symbols-outlined text-error">info</span>
+          <p className="text-on-error-container font-label-md text-label-md">
+            Fiyat, bu donanım ve kilometre için topluluk ortalamasının %{report.percentageAbove} üzerindedir.
+          </p>
+        </div>
+      </div>
+
+      {/* Next Steps */}
+      <div className="flex flex-col md:flex-row gap-gutter">
+        <button className="flex-1 bg-secondary-container text-on-secondary-container py-5 rounded-xl font-title-md text-title-md font-bold flex items-center justify-center gap-3 hover:opacity-90 transition-all active:scale-95 shadow-sm">
+          <span className="material-symbols-outlined">support_agent</span>
+          Uzmana Sor
+        </button>
+        <Link 
+          href={`/arac/bmw/3-series/f30`}
+          className="flex-1 border-2 border-primary-container text-primary-container py-5 rounded-xl font-title-md text-title-md font-bold flex items-center justify-center gap-3 hover:bg-primary-container hover:text-white transition-all active:scale-95 text-center block"
+        >
+          <span className="material-symbols-outlined font-bold">menu_book</span>
+          Tam Model Rehberini Gör
+        </Link>
+      </div>
     </div>
   )
 }

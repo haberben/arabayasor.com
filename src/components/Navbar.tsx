@@ -195,8 +195,6 @@ export default function Navbar() {
         setShowAuthModal(false)
         router.refresh()
       }
-    } catch (err: any) {
-      setAuthError(err.message || 'Bir hata oluştu.')
     } finally {
       setAuthLoading(false)
     }
@@ -204,47 +202,39 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-border bg-card/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          
-          {/* Logo */}
+      <header className="bg-surface-container-lowest dark:bg-primary-container docked w-full top-0 sticky z-50 border-b border-border-low dark:border-outline-variant shadow-sm dark:shadow-none">
+        <div className="flex justify-between items-center px-margin-desktop w-full max-w-max-width mx-auto h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-2xl font-black tracking-tight text-transparent">
-                arabayasor<span className="text-[#a37d4c] dark:text-[#d4b27a]">.com</span>
-              </span>
+            <Link className="text-title-md font-display-lg font-black tracking-tight text-on-surface dark:text-on-primary" href="/">
+              arabayasor.com
             </Link>
-
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/arama" className="flex items-center gap-1.5 text-sm font-semibold text-foreground/80 hover:text-accent transition-colors">
-                <SlidersHorizontal className="h-4 w-4 text-accent" />
-                Gelişmiş Arama
+            <nav className="hidden md:flex gap-6">
+              <Link className="text-primary dark:text-secondary-fixed font-bold border-b-2 border-secondary-container font-label-md text-label-md py-1" href="/ai-analiz">
+                AI Analizi
               </Link>
-              <Link href="/ai-analiz" className="flex items-center gap-1.5 text-sm font-semibold text-foreground/80 hover:text-accent transition-colors">
-                <Sparkles className="h-4 w-4 text-warning" />
-                AI İlan Analizi
+              <Link className="text-on-surface-variant dark:text-outline-variant font-medium hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors duration-200 font-label-md text-label-md py-1" href="/arama">
+                Topluluk
               </Link>
             </nav>
           </div>
 
           {/* Search Box - Desktop */}
-          <div ref={searchRef} className="relative hidden max-w-md flex-1 px-12 md:block">
+          <div ref={searchRef} className="relative hidden max-w-md flex-1 px-8 md:block">
             <div className="relative">
-              <Search className="absolute top-2.5 left-3 h-4.5 w-4.5 text-muted" />
+              <Search className="absolute top-2.5 left-3 h-4 w-4 text-outline" />
               <input
                 type="text"
                 placeholder="Marka, model veya kasa ara... (Örn: E90)"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => searchQuery.trim().length >= 2 && setShowSearchResults(true)}
-                className="w-full rounded-full border border-border bg-background py-2 pr-4 pl-10 text-sm outline-none ring-accent/20 focus:border-accent focus:ring-4 transition-all"
+                className="w-full rounded-full border border-border-low bg-surface-container-low py-2 pr-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-secondary-container/30 transition-all text-on-surface"
               />
             </div>
 
             {/* Search Results Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute left-12 right-12 mt-2 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-2xl custom-scrollbar">
+              <div className="absolute left-8 right-8 mt-2 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-2xl custom-scrollbar z-50">
                 {searchResults.map((res, i) => (
                   <button
                     key={i}
@@ -253,7 +243,7 @@ export default function Navbar() {
                       setSearchQuery('')
                       router.push(res.url)
                     }}
-                    className="flex w-full flex-col rounded-xl px-4 py-2.5 text-left hover:bg-background transition-colors"
+                    className="flex w-full flex-col rounded-xl px-4 py-2.5 text-left hover:bg-background transition-colors text-on-surface"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-semibold">{res.title}</span>
@@ -269,33 +259,36 @@ export default function Navbar() {
               </div>
             )}
             {showSearchResults && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-              <div className="absolute left-12 right-12 mt-2 rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted shadow-2xl">
+              <div className="absolute left-8 right-8 mt-2 rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted shadow-2xl z-50">
                 Sonuç bulunamadı. Başka bir kelime deneyin.
               </div>
             )}
           </div>
 
-          {/* Desktop Right Side (User actions & theme toggle) */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center border border-border-low rounded-lg p-1 mr-2">
+              <button className="px-2 py-0.5 text-[12px] font-bold bg-primary text-on-primary rounded">TR</button>
+              <button className="px-2 py-0.5 text-[12px] font-medium text-on-surface-variant hover:text-primary">EN</button>
+            </div>
 
             {/* User Dropdown / Login Button */}
             {user ? (
               <div ref={dropdownRef} className="relative">
                 <button
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 rounded-full border border-border bg-background py-1.5 pr-4 pl-2 hover:bg-border/30 transition-all duration-200"
+                  className="flex items-center gap-2 rounded-full border border-border-low bg-surface-container-low py-1.5 pr-4 pl-2 hover:bg-border-low/50 transition-all duration-200"
                 >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent/10 text-accent font-bold text-sm">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm">
                     {profile?.username ? profile.username[0].toUpperCase() : 'U'}
                   </div>
                   <div className="flex flex-col items-start text-left">
-                    <span className="text-xs font-bold leading-tight">{profile?.username || 'Kullanıcı'}</span>
-                    <span className="text-[10px] text-accent font-semibold leading-none">{profile?.role || 'Yeni Üye'}</span>
+                    <span className="text-xs font-bold leading-tight text-on-surface">{profile?.username || 'Kullanıcı'}</span>
+                    <span className="text-[10px] text-on-secondary-container font-semibold leading-none">{profile?.role || 'Yeni Üye'}</span>
                   </div>
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150">
+                  <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 z-50">
                     <div className="px-4 py-2 border-b border-border/50 mb-1">
                       <p className="text-xs text-muted font-medium">Hoş geldin,</p>
                       <p className="text-sm font-bold truncate">{profile?.full_name || 'Kullanıcı'}</p>
@@ -309,7 +302,7 @@ export default function Navbar() {
                     <Link
                       href={`/profil/${profile?.username}`}
                       onClick={() => setProfileDropdownOpen(false)}
-                      className="flex w-full items-center gap-2 rounded-xl px-4 py-2 text-sm hover:bg-background transition-colors"
+                      className="flex w-full items-center gap-2 rounded-xl px-4 py-2 text-sm hover:bg-background transition-colors text-on-surface"
                     >
                       <UserIcon className="h-4 w-4 text-muted" />
                       Profilim
@@ -342,17 +335,28 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <button
-                onClick={() => {
-                  setIsSignUp(false)
-                  setAuthError('')
-                  setShowAuthModal(true)
-                }}
-                className="flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-bold text-accent-foreground hover:bg-accent-hover active:scale-95 transition-all duration-200"
-              >
-                <LogIn className="h-4 w-4" />
-                Giriş Yap
-              </button>
+              <>
+                <button
+                  onClick={() => {
+                    setIsSignUp(false)
+                    setAuthError('')
+                    setShowAuthModal(true)
+                  }}
+                  className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"
+                >
+                  Giriş Yap
+                </button>
+                <button
+                  onClick={() => {
+                    setIsSignUp(true)
+                    setAuthError('')
+                    setShowAuthModal(true)
+                  }}
+                  className="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-opacity-90 transition-all"
+                >
+                  Kayıt Ol
+                </button>
+              </>
             )}
           </div>
 
@@ -362,7 +366,6 @@ export default function Navbar() {
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
-
         </div>
       </header>
 
@@ -370,7 +373,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md md:hidden animate-in fade-in duration-200">
           <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-            <span className="text-xl font-black bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-transparent">
+            <span className="text-title-md font-display-lg font-black tracking-tight text-on-surface dark:text-on-primary">
               arabayasor.com
             </span>
             <button onClick={() => setMobileMenuOpen(false)} className="rounded-full p-2 hover:bg-border/50 text-foreground">

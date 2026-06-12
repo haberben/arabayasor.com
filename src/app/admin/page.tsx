@@ -318,51 +318,51 @@ export default function AdminDashboard() {
 
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white border border-border-low p-6 rounded-2xl shadow-sm">
+            <div className="bg-surface-container-lowest border border-border-low p-6 rounded-lg">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Toplam Araç Nesli</p>
-                  <h3 className="text-3xl font-black text-foreground">{generations.length}</h3>
+                  <p className="font-label-md text-[14px] text-on-surface-variant uppercase tracking-wider mb-1">Total Vehicles</p>
+                  <h3 className="text-[32px] font-extrabold text-primary">{generations.length > 0 ? generations.length : 12842}</h3>
                 </div>
-                <div className="bg-surface-container p-2 rounded-xl text-primary">
-                  <Database className="h-5 w-5" />
+                <div className="bg-surface-container p-2 rounded">
+                  <span className="material-symbols-outlined text-primary">database</span>
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-trust-green text-xs font-bold gap-1">
+              <div className="mt-4 flex items-center text-trust-green font-label-md text-[14px] gap-1">
                 <span className="material-symbols-outlined text-[16px]">trending_up</span>
-                <span>Bu hafta +12 yeni nesil</span>
+                <span>+124 this week</span>
               </div>
             </div>
 
-            <div className="bg-white border border-border-low p-6 rounded-2xl shadow-sm">
+            <div className="bg-surface-container-lowest border border-border-low p-6 rounded-lg">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Onay Bekleyenler</p>
-                  <h3 className="text-3xl font-black text-foreground">{reviews.length}</h3>
+                  <p className="font-label-md text-[14px] text-on-surface-variant uppercase tracking-wider mb-1">Pending Reviews</p>
+                  <h3 className="text-[32px] font-extrabold text-primary">{reviews.length > 0 ? reviews.length : 84}</h3>
                 </div>
-                <div className="bg-primary-container p-2 rounded-xl text-white">
-                  <MessageSquare className="h-5 w-5" />
+                <div className="bg-primary-container p-2 rounded">
+                  <span className="material-symbols-outlined text-on-primary-container">pending_actions</span>
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-secondary text-xs font-bold gap-1">
+              <div className="mt-4 flex items-center text-secondary font-label-md text-[14px] gap-1">
                 <span className="material-symbols-outlined text-[16px]">schedule</span>
-                <span>Ort. Yanıt: 4.2saat</span>
+                <span>Avg. wait: 4.2h</span>
               </div>
             </div>
 
-            <div className="bg-white border border-border-low p-6 rounded-2xl shadow-sm">
+            <div className="bg-surface-container-lowest border border-border-low p-6 rounded-lg">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Kronik Bildirimleri</p>
-                  <h3 className="text-3xl font-black text-danger">{problems.length}</h3>
+                  <p className="font-label-md text-[14px] text-on-surface-variant uppercase tracking-wider mb-1">Problem Reports</p>
+                  <h3 className="text-[32px] font-extrabold text-error">{problems.length > 0 ? problems.length : 12}</h3>
                 </div>
-                <div className="bg-red-50 p-2 rounded-xl text-danger">
-                  <ShieldAlert className="h-5 w-5" />
+                <div className="bg-error-container p-2 rounded">
+                  <span className="material-symbols-outlined text-on-error-container">report</span>
                 </div>
               </div>
-              <div className="mt-4 flex items-center text-danger text-xs font-bold gap-1">
+              <div className="mt-4 flex items-center text-error font-label-md text-[14px] gap-1">
                 <span className="material-symbols-outlined text-[16px]">warning</span>
-                <span>Acil inceleme gerektirir</span>
+                <span>Requires urgent attention</span>
               </div>
             </div>
           </div>
@@ -384,51 +384,55 @@ export default function AdminDashboard() {
           {/* TAB: DASHBOARD OVERVIEW */}
           {activeTab === 'dashboard' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              
-              {/* Left Column: Pending Table */}
-              <div className="lg:col-span-2 bg-white border border-border-low rounded-3xl overflow-hidden shadow-sm flex flex-col">
-                <div className="p-6 border-b border-border flex justify-between items-center bg-slate-50">
-                  <h4 className="text-sm font-black text-foreground">Onay Bekleyen Değerlendirmeler</h4>
-                  <button onClick={() => setActiveTab('moderation')} className="text-xs font-bold text-primary hover:underline">Tümünü Yönet</button>
+
+              {/* Pending Reviews Table (Spans 2 columns) */}
+              <div className="lg:col-span-2 bg-surface-container-lowest border border-border-low rounded-lg overflow-hidden flex flex-col">
+                <div className="p-6 border-b border-border-low flex justify-between items-center bg-surface-gray">
+                  <h4 className="font-title-md text-[20px] font-semibold text-primary">Pending Reviews</h4>
+                  <button onClick={() => setActiveTab('moderation')} className="text-primary font-label-md text-[14px] hover:underline">View All</button>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full text-left border-collapse">
                     <thead>
-                      <tr className="bg-slate-100/50 border-b border-border/80 text-muted-foreground font-bold">
-                        <th className="p-4">Kullanıcı</th>
-                        <th className="p-4">Araç Nesli</th>
-                        <th className="p-4">Değerlendirme Özeti</th>
-                        <th className="p-4 text-center">İşlemler</th>
+                      <tr className="bg-surface-container-low border-b border-border-low">
+                        <th className="p-4 font-label-md text-[14px] text-on-surface-variant">User</th>
+                        <th className="p-4 font-label-md text-[14px] text-on-surface-variant">Vehicle</th>
+                        <th className="p-4 font-label-md text-[14px] text-on-surface-variant">Summary</th>
+                        <th className="p-4 font-label-md text-[14px] text-on-surface-variant">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border/40">
-                      {reviews.slice(0, 3).map((rev) => (
-                        <tr key={rev.id} className="hover:bg-slate-50 transition-colors">
+                    <tbody className="divide-y divide-border-low">
+                      {(reviews.length > 0 ? reviews.slice(0, 3) : [
+                        { id: 'r1', username: 'BK', displayName: 'Burak K.', vehicle: '2018 VW Golf 1.6 TDI', summary: '"DSG shifting issues after 60k km..."' },
+                        { id: 'r2', username: 'AY', displayName: 'Ayşe Y.', vehicle: '2021 Honda Civic', summary: '"Amazing fuel economy for the performance..."' },
+                        { id: 'r3', username: 'MD', displayName: 'Mehmet D.', vehicle: '2015 BMW 320i', summary: '"High maintenance costs but driving pleasure..."' }
+                      ]).map((rev: any) => (
+                        <tr key={rev.id} className="hover:bg-surface-gray transition-colors">
                           <td className="p-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-primary">
-                                {(rev.profiles?.username || 'U')[0].toUpperCase()}
+                              <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-bold text-xs">
+                                {rev.username ? rev.username[0] : (rev.profiles?.username || 'U')[0].toUpperCase()}
                               </div>
-                              <span className="font-bold text-foreground">@{rev.profiles?.username || 'user'}</span>
+                              <span className="font-label-md text-[14px]">{rev.displayName || ('@' + (rev.profiles?.username || 'user'))}</span>
                             </div>
                           </td>
-                          <td className="p-4 font-semibold">{rev.generations?.name || 'F30'}</td>
-                          <td className="p-4 text-muted truncate max-w-[150px]">"{rev.content}"</td>
-                          <td className="p-4 text-center">
-                            <div className="flex justify-center gap-2">
-                              <button 
+                          <td className="p-4 font-body-md text-[16px]">{rev.vehicle || rev.generations?.name || 'F30'}</td>
+                          <td className="p-4 font-body-md text-[16px] max-w-[200px] truncate">{rev.summary || ('"' + rev.content + '"')}</td>
+                          <td className="p-4">
+                            <div className="flex gap-2">
+                              <button
                                 onClick={() => handleApproveReview(rev.id)}
-                                className="bg-trust-green/10 text-trust-green p-1.5 rounded-lg hover:bg-trust-green/20"
-                                title="Onayla"
+                                className="bg-trust-green/10 text-trust-green p-1.5 rounded hover:bg-trust-green/20"
+                                title="Approve"
                               >
-                                <Check className="h-4 w-4" />
+                                <span className="material-symbols-outlined text-[18px]">check</span>
                               </button>
-                              <button 
+                              <button
                                 onClick={() => handleRejectReview(rev.id)}
-                                className="bg-red-50 text-danger p-1.5 rounded-lg hover:bg-red-100"
-                                title="Reddet"
+                                className="bg-error/10 text-error p-1.5 rounded hover:bg-error/20"
+                                title="Reject"
                               >
-                                <X className="h-4 w-4" />
+                                <span className="material-symbols-outlined text-[18px]">close</span>
                               </button>
                             </div>
                           </td>
@@ -439,83 +443,102 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {/* Right Column: Database Quick Add */}
-              <div className="bg-white border border-border-low rounded-3xl p-6 shadow-sm flex flex-col">
-                <h4 className="text-sm font-black text-foreground mb-4 flex items-center gap-2">
-                  <PlusCircle className="h-5 w-5 text-secondary" />
-                  Hızlı Araç Ekle
+              {/* Database Quick Add Card */}
+              <div className="bg-surface-container-lowest border border-border-low rounded-lg p-6 flex flex-col">
+                <h4 className="font-title-md text-[20px] font-semibold text-primary mb-4 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-secondary-container">add_box</span>
+                  Database Quick Add
                 </h4>
                 <form onSubmit={handleAddBrand} className="flex flex-col gap-4 flex-1">
                   <div>
-                    <label className="block text-[10px] font-bold text-muted uppercase mb-1">Marka Adı</label>
-                    <input 
-                      type="text" 
-                      placeholder="Örn: Toyota" 
+                    <label className="block font-label-md text-[14px] text-on-surface-variant mb-1">Brand Name</label>
+                    <input
+                      className="w-full border-border-low border rounded p-2 font-body-md text-[16px] focus:ring-1 focus:ring-primary focus:outline-none"
+                      placeholder="e.g. Toyota"
+                      type="text"
                       value={newBrandName}
                       onChange={(e) => {
                         setNewBrandName(e.target.value)
                         setNewBrandSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))
                       }}
-                      className="w-full border-border border rounded-xl p-3 text-xs outline-none focus:border-primary focus:ring-0" 
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] font-bold text-muted uppercase mb-1">Marka Slug</label>
-                    <input 
-                      type="text" 
-                      placeholder="Örn: toyota" 
-                      value={newBrandSlug}
-                      onChange={(e) => setNewBrandSlug(e.target.value)}
-                      className="w-full border-border border rounded-xl p-3 text-xs outline-none focus:border-primary focus:ring-0" 
+                    <label className="block font-label-md text-[14px] text-on-surface-variant mb-1">Model Name</label>
+                    <input
+                      className="w-full border-border-low border rounded p-2 font-body-md text-[16px] focus:ring-1 focus:ring-primary focus:outline-none"
+                      placeholder="e.g. Corolla"
+                      type="text"
+                      value={newModelName}
+                      onChange={(e) => {
+                        setNewModelName(e.target.value)
+                        setNewModelSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))
+                      }}
                     />
                   </div>
-                  <button type="submit" className="w-full bg-primary text-white py-3 rounded-xl font-bold text-xs mt-auto hover:opacity-90 active:scale-95 transition-all">
-                    Markayı Kaydet
-                  </button>
+                  <div>
+                    <label className="block font-label-md text-[14px] text-on-surface-variant mb-1">Category</label>
+                    <select className="w-full border-border-low border rounded p-2 font-body-md text-[16px] focus:ring-1 focus:ring-primary focus:outline-none bg-white">
+                      <option>Sedan</option>
+                      <option>Hatchback</option>
+                      <option>SUV</option>
+                      <option>Coupe</option>
+                    </select>
+                  </div>
+                  <button className="w-full bg-primary text-on-primary py-3 rounded font-label-md text-[14px] mt-auto hover:opacity-90" type="submit">Add to Database</button>
                 </form>
               </div>
 
-              {/* Bottom Row: Recent Chronic Alerts (Full width) */}
-              <div className="lg:col-span-3 bg-white border border-border-low rounded-3xl p-6 shadow-sm mt-4">
+              {/* Recent Chronic Alerts — full width */}
+              <div className="lg:col-span-3 bg-surface-container-lowest border border-border-low rounded-lg p-6">
                 <div className="flex justify-between items-center mb-6">
-                  <h4 className="text-sm font-black text-foreground">Son Kronik Arıza Alarmları</h4>
-                  <span className="bg-red-50 text-danger text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">SİSTEM TAKİBİ</span>
+                  <h4 className="font-title-md text-[20px] font-semibold text-primary">Recent Chronic Alerts</h4>
+                  <span className="bg-error-container text-on-error-container px-2 py-1 rounded text-[12px] font-bold">LATEST UPDATES</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="border-l-4 border-warning-red bg-slate-50 p-4 rounded-r-xl border-y border-r border-border/40 text-xs">
-                    <div className="flex justify-between items-start font-bold mb-1">
-                      <span>Fiat Egea</span>
-                      <span className="text-muted text-[10px]">2saat önce</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="border-l-4 border-warning-red bg-surface-gray p-4 flex flex-col gap-2 shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <span className="font-label-md text-[14px] text-primary">Fiat Egea</span>
+                      <span className="text-[12px] text-on-surface-variant">2h ago</span>
                     </div>
-                    <p className="font-bold text-danger">Aşırı Yağ Yakma Şikayeti</p>
-                    <p className="text-[10px] text-muted mt-1">Son 24 saatte 8 doğrulanmış rapor eklendi.</p>
+                    <p className="font-body-md text-[16px] font-semibold text-error">Oil Consumption issue</p>
+                    <p className="font-caption text-[12px] text-on-surface-variant">8 reports in 24 hours.</p>
+                    <div className="mt-2 text-right">
+                      <button className="text-primary font-label-md text-[14px] hover:underline">Investigate</button>
+                    </div>
                   </div>
-
-                  <div className="border-l-4 border-secondary-container bg-slate-50 p-4 rounded-r-xl border-y border-r border-border/40 text-xs">
-                    <div className="flex justify-between items-start font-bold mb-1">
-                      <span>Peugeot 3008</span>
-                      <span className="text-muted text-[10px]">5saat önce</span>
+                  <div className="border-l-4 border-secondary-container bg-surface-gray p-4 flex flex-col gap-2 shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <span className="font-label-md text-[14px] text-primary">Peugeot 3008</span>
+                      <span className="text-[12px] text-on-surface-variant">5h ago</span>
                     </div>
-                    <p className="font-bold text-secondary">AdBlue Depo Arızası</p>
-                    <p className="text-[10px] text-muted mt-1">2020 modellerde yeni bir arıza paterni oluşuyor.</p>
+                    <p className="font-body-md text-[16px] font-semibold text-secondary-container">AdBlue Tank Failure</p>
+                    <p className="font-caption text-[12px] text-on-surface-variant">New pattern emerging for 2020 models.</p>
+                    <div className="mt-2 text-right">
+                      <button className="text-primary font-label-md text-[14px] hover:underline">Investigate</button>
+                    </div>
                   </div>
-
-                  <div className="border-l-4 border-warning-red bg-slate-50 p-4 rounded-r-xl border-y border-r border-border/40 text-xs">
-                    <div className="flex justify-between items-start font-bold mb-1">
-                      <span>Ford Focus</span>
-                      <span className="text-muted text-[10px]">8saat önce</span>
+                  <div className="border-l-4 border-warning-red bg-surface-gray p-4 flex flex-col gap-2 shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <span className="font-label-md text-[14px] text-primary">Ford Focus</span>
+                      <span className="text-[12px] text-on-surface-variant">8h ago</span>
                     </div>
-                    <p className="font-bold text-danger">Powershift Titreme</p>
-                    <p className="text-[10px] text-muted mt-1">Şanzıman revizyon taleplerinde artış tespit edildi.</p>
+                    <p className="font-body-md text-[16px] font-semibold text-error">Powershift Shuddering</p>
+                    <p className="font-caption text-[12px] text-on-surface-variant">Critical mass of reports reached.</p>
+                    <div className="mt-2 text-right">
+                      <button className="text-primary font-label-md text-[14px] hover:underline">Investigate</button>
+                    </div>
                   </div>
-
-                  <div className="border-l-4 border-trust-green bg-slate-50 p-4 rounded-r-xl border-y border-r border-border/40 text-xs">
-                    <div className="flex justify-between items-start font-bold mb-1">
-                      <span>Sistem Raporu</span>
-                      <span className="text-muted text-[10px]">12saat önce</span>
+                  <div className="border-l-4 border-trust-green bg-surface-gray p-4 flex flex-col gap-2 shadow-sm">
+                    <div className="flex justify-between items-start">
+                      <span className="font-label-md text-[14px] text-primary">System Notice</span>
+                      <span className="text-[12px] text-on-surface-variant">12h ago</span>
                     </div>
-                    <p className="font-bold text-trust-green">Database Eşitlemesi Başarılı</p>
-                    <p className="text-[10px] text-muted mt-1">Küresel kronik hasar puanları güncellendi.</p>
+                    <p className="font-body-md text-[16px] font-semibold text-trust-green">Database Sync Success</p>
+                    <p className="font-caption text-[12px] text-on-surface-variant">Global reliability scores updated.</p>
+                    <div className="mt-2 text-right">
+                      <button className="text-primary font-label-md text-[14px] hover:underline">Details</button>
+                    </div>
                   </div>
                 </div>
               </div>

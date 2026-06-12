@@ -1,65 +1,116 @@
 import Link from 'next/link'
 import { Sparkles, Shield, Mail } from 'lucide-react'
 
+
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-border bg-card/50 mt-auto">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          
-          {/* Logo ve Tanım */}
-          <div className="flex flex-col gap-4 md:col-span-2">
-            <span className="bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-xl font-black tracking-tight text-transparent">
-              arabayasor<span className="text-[#a37d4c] dark:text-[#d4b27a]">.com</span>
-            </span>
-            <p className="text-xs text-muted max-w-sm leading-relaxed">
-              Otomobil sahipleri, ustalar, galericiler ve meraklıların araç kronik sorunlarını paylaştığı, değerlendirdiği ve yapay zeka desteğiyle doğru kararları hızlıca alabildiği bağımsız bir topluluk platformudur.
-            </p>
-          </div>
-
-          {/* Hızlı Bağlantılar */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground/80">Keşfet</h4>
-            <ul className="flex flex-col gap-2 text-xs text-muted">
-              <li>
-                <Link href="/" className="hover:text-accent transition-colors">Ana Sayfa</Link>
-              </li>
-              <li>
-                <Link href="/ai-analiz" className="flex items-center gap-1 hover:text-accent transition-colors">
-                  <Sparkles className="h-3.5 w-3.5 text-warning" />
-                  AI İlan Analizi
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* İletişim & Destek */}
-          <div className="flex flex-col gap-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground/80">Destek & Güvenlik</h4>
-            <ul className="flex flex-col gap-2 text-xs text-muted">
-              <li className="flex items-center gap-1.5">
-                <Shield className="h-3.5 w-3.5 text-success" />
-                <span>Tek Oy Güvenliği</span>
-              </li>
-              <li className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" />
-                <span>destek@arabayasor.com</span>
-              </li>
-            </ul>
-          </div>
-
-        </div>
-
-        {/* Alt Kısım */}
-        <div className="mt-12 pt-8 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[10px] text-muted-foreground">
-            &copy; {new Date().getFullYear()} arabayasor.com. Tüm hakları saklıdır. Platform içeriği kullanıcıların beyanları ve topluluk oylamalarıyla oluşur.
+    <footer className="bg-primary-container dark:bg-black w-full border-t border-border-low dark:border-outline-variant">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-margin-desktop py-12 max-w-max-width mx-auto">
+        <div>
+          <h3 className="text-title-md font-display-lg text-on-primary mb-4 font-black tracking-tight">
+            arabayasor.com
+          </h3>
+          <p className="font-body-md text-body-md text-on-primary-container dark:text-outline-variant mb-4 leading-relaxed">
+            Türkiye'nin teknik odaklı ilk otomobil topluluğu.
           </p>
-          <div className="flex items-center gap-4 text-muted text-xs">
-            <Link href="#" className="hover:text-accent transition-colors">Kullanım Koşulları</Link>
-            <Link href="#" className="hover:text-accent transition-colors">Gizlilik Politikası</Link>
+          <div className="flex gap-4">
+            <span className="material-symbols-outlined text-on-primary opacity-60 cursor-pointer hover:opacity-100">
+              public
+            </span>
+            <span className="material-symbols-outlined text-on-primary opacity-60 cursor-pointer hover:opacity-100">
+              share
+            </span>
           </div>
         </div>
+        
+        <div>
+          <h4 className="font-label-md text-label-md text-secondary-fixed mb-4 font-bold uppercase tracking-wider">
+            Hızlı Erişim
+          </h4>
+          <ul className="space-y-2 font-body-md text-body-md">
+            <li>
+              <Link 
+                href="/arama" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                Popüler Markalar
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/arama" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                Kronik Sorunlar
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/ai-analiz" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                AI Karşılaştırma
+              </Link>
+            </li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 className="font-label-md text-label-md text-secondary-fixed mb-4 font-bold uppercase tracking-wider">
+            Destek
+          </h4>
+          <ul className="space-y-2 font-body-md text-body-md">
+            <li>
+              <Link 
+                href="#" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                Kullanım Kılavuzu
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="#" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                İletişim
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="#" 
+                className="text-on-primary-container dark:text-outline-variant hover:text-secondary-fixed transition-colors"
+              >
+                Uzman İncelemeleri
+              </Link>
+            </li>
+          </ul>
+        </div>
+        
+        <div>
+          <h4 className="font-label-md text-label-md text-secondary-fixed mb-4 font-bold uppercase tracking-wider">
+            Bülten
+          </h4>
+          <p className="font-caption text-caption text-on-primary-container dark:text-outline-variant mb-4 leading-relaxed">
+            Haftalık teknik raporlar ve piyasa özeti için kaydolun.
+          </p>
+          <div className="flex">
+            <input 
+              className="bg-white/10 border-none rounded-l px-3 py-2 text-on-primary font-caption w-full outline-none placeholder:text-on-primary-container" 
+              placeholder="E-posta" 
+              type="email"
+            />
+            <button className="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-r hover:bg-opacity-95 transition-all">
+              <span className="material-symbols-outlined align-middle">send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div className="border-t border-white/10 py-6 text-center">
+        <p className="font-label-md text-label-md text-on-primary-container dark:text-outline-variant">
+          © {new Date().getFullYear()} arabayasor.com - Teknik Güvenilirlik Topluluğu
+        </p>
       </div>
     </footer>
   )

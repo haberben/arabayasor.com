@@ -277,14 +277,6 @@ export default function Navbar() {
 
           {/* Desktop Right Side (User actions & theme toggle) */}
           <div className="hidden md:flex items-center gap-4">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="rounded-full p-2.5 hover:bg-border/50 text-foreground/80 hover:text-foreground transition-all duration-200"
-              title={theme === 'dark' ? 'Açık Mod' : 'Karanlık Mod'}
-            >
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
 
             {/* User Dropdown / Login Button */}
             {user ? (
@@ -366,9 +358,6 @@ export default function Navbar() {
 
           {/* Mobile Menu Button */}
           <div className="flex items-center gap-3 md:hidden">
-            <button onClick={toggleTheme} className="rounded-full p-2 hover:bg-border/50 text-foreground/85">
-              {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="rounded-full p-2 hover:bg-border/50 text-foreground">
               {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>

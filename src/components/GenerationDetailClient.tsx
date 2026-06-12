@@ -11,7 +11,7 @@ import {
 import { 
   Star, ShieldAlert, Award, MessageSquare, AlertCircle, Wrench, 
   ThumbsUp, ThumbsDown, Pin, Activity, CheckCircle2, PlusCircle, HelpCircle,
-  ChevronRight
+  ChevronRight, SlidersHorizontal
 } from 'lucide-react'
 
 const getAverageReviewRating = (r: any) => {
@@ -24,6 +24,76 @@ const getAverageReviewRating = (r: any) => {
     (r.rating_parts || 0) + 
     (r.rating_mechanic || 0)
   return (total / 7).toFixed(1)
+}
+
+const hotspotDetails: {
+  [key: number]: {
+    title: string
+    faults: string[]
+    price: string
+    expert: string
+  }
+} = {
+  1: {
+    title: 'Motor (Silindir Kapağı & Zincir)',
+    faults: [
+      'Yağ filtresi gövdesi sızıntıları',
+      'Valvetronic motor arızası',
+      'Vanos dişlisi aşınması ve soğuk start sesleri'
+    ],
+    price: '15.000 TL - 45.000 TL',
+    expert: 'Özellikle N13/N20 motorlarda yağ ve su kaçaklarına karşı düzenli conta kontrolleri elzemdir.'
+  },
+  2: {
+    title: 'ZF8 Şanzıman',
+    faults: [
+      'Tork konvertör kilitleme titremesi',
+      'Mekatronik selenoid valf aşınması',
+      'Karter contası sızıntısı'
+    ],
+    price: '12.000 TL - 35.000 TL',
+    expert: 'Her 80.000 km\'de bir şanzıman yağı ve karter filtresi orijinal ZF setiyle değiştirilmelidir.'
+  },
+  3: {
+    title: 'Elektrik & FEM Beyni',
+    faults: [
+      'FEM (Front Body Module) su alması',
+      'iDrive ekran kararmaları',
+      'Direksiyon kolon kilidi (ELV) hatası'
+    ],
+    price: '8.000 TL - 22.000 TL',
+    expert: 'Ön cam altı tahliye kanalları tıkandığında su doğrudan FEM beynine sızabilir.'
+  },
+  4: {
+    title: 'Süspansiyon & Direksiyon Kutusu',
+    faults: [
+      'Direksiyon kutusu tıkırtısı ve boşluk',
+      'Ön salıncak burçları yırtılması',
+      'Amortisör kule bilyaları aşınması'
+    ],
+    price: '6.000 TL - 18.000 TL',
+    expert: 'Kasislerden geçerken gelen tıkırtı sesi genellikle kutu tamir kitiyle giderilebilir.'
+  },
+  5: {
+    title: 'Turboşarj Sistemi',
+    faults: [
+      'Turbo wastegate boşluğu ve ses yapması',
+      'Turbo yağ besleme borusu sızıntısı',
+      'Elektrikli wastegate motor arızası'
+    ],
+    price: '10.000 TL - 28.000 TL',
+    expert: 'Wastegate sesi can sıksa da çekişi etkilemedikçe acil revizyon gerektirmez.'
+  },
+  6: {
+    title: 'Farlar & Angel Gözler',
+    faults: [
+      'Angel LED modül sürücü arızası',
+      'Far camı içten buğulanma',
+      'Xenon mercek kararmaları'
+    ],
+    price: '4.000 TL - 12.000 TL',
+    expert: 'Farların arkasındaki havalandırma tıpaları tıkandığında buğulanma kronikleşir.'
+  }
 }
 
 interface ClientProps {
@@ -49,6 +119,7 @@ export default function GenerationDetailClient({
 
   // Tab State
   const [activeTab, setActiveTab] = useState<'overview' | 'problems' | 'reviews' | 'guide' | 'parts'>('overview')
+  const [selectedHotspot, setSelectedHotspot] = useState<number | null>(null)
 
   // Data States
   const [reviews, setReviews] = useState<any[]>(initialReviews)
@@ -497,6 +568,100 @@ export default function GenerationDetailClient({
           
           {/* Motor Seçenekleri */}
           <div className="lg:col-span-2 space-y-6">
+
+            {/* Interactive Schematic Section */}
+            <div className="glass-card p-6 shadow-md overflow-hidden">
+              <h2 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2">
+                <SlidersHorizontal className="h-5 w-5 text-accent" />
+                İnteraktif Kronik Arıza Şeması
+              </h2>
+              
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Schematic Image Area */}
+                <div className="md:w-2/3 relative select-none">
+                  <img 
+                    alt="BMW Interactive Schematic" 
+                    className="w-full h-auto rounded-2xl border border-border" 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAw4V6OeqqnlucwD0xHYB0E9TaiCxqEAXlORjz5GNSUXlM6dIZA6EksjCADFjrUVcXWZ-u3Lg9qIgq-o6uNxBTZN-B4wCR-s2jTPUBfwMCSZTj0QKJYbJ5Dp2eU31tFHKpbCz0IS6NKN1JHIlYktWSMnkqN_t6oirGzYlRMCYaCFJ4m5uCnukY7DwkoEC7gkVK4ZoWJRTO1fUXmO8Aq-_uC7mSABQsSYDdVuyY310yv2WfrCbcEMyYDCp7w61xA1djmqPx51C4nkT0"
+                  />
+                  {/* Hotspots */}
+                  <div className="absolute inset-0">
+                    <button 
+                      onClick={() => setSelectedHotspot(1)}
+                      className={`absolute top-[45%] left-[32%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 1 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      1
+                    </button>
+                    <button 
+                      onClick={() => setSelectedHotspot(2)}
+                      className={`absolute top-[58%] left-[48%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 2 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      2
+                    </button>
+                    <button 
+                      onClick={() => setSelectedHotspot(3)}
+                      className={`absolute top-[30%] left-[82%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 3 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      3
+                    </button>
+                    <button 
+                      onClick={() => setSelectedHotspot(4)}
+                      className={`absolute top-[45%] left-[75%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 4 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      4
+                    </button>
+                    <button 
+                      onClick={() => setSelectedHotspot(5)}
+                      className={`absolute top-[40%] left-[42%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 5 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      5
+                    </button>
+                    <button 
+                      onClick={() => setSelectedHotspot(6)}
+                      className={`absolute top-[68%] left-[24%] w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shadow-lg transition-all hover:scale-125 z-10 ${selectedHotspot === 6 ? 'bg-primary text-on-primary ring-4 ring-accent/40 scale-110' : 'bg-secondary-container text-on-secondary-container'}`}
+                    >
+                      6
+                    </button>
+                  </div>
+                </div>
+
+                {/* Part Details Sidebar */}
+                <div className="md:w-1/3 bg-surface-container-low dark:bg-background/40 p-4 rounded-2xl border border-border/60 min-h-[200px] flex flex-col justify-center">
+                  {selectedHotspot === null ? (
+                    <div className="text-center space-y-3 p-4">
+                      <span className="material-symbols-outlined text-3xl text-muted-foreground/50">touch_app</span>
+                      <p className="text-xs text-on-surface-variant dark:text-outline-variant font-medium leading-relaxed">
+                        Kronik bölgeleri, onarım maliyetlerini ve usta tavsiyelerini görmek için şema üzerindeki numaralara tıklayın.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 animate-in fade-in duration-200">
+                      <h4 className="text-sm font-bold text-primary dark:text-[#fea619] border-b border-border/80 pb-2">
+                        {hotspotDetails[selectedHotspot].title}
+                      </h4>
+                      <div className="space-y-2">
+                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Yaygın Arızalar</span>
+                        <ul className="list-disc pl-4 text-xs text-on-surface-variant dark:text-outline-variant space-y-1">
+                          {hotspotDetails[selectedHotspot].faults.map((f, i) => (
+                            <li key={i}>{f}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="pt-3 border-t border-border/80">
+                        <div className="flex justify-between items-center text-xs">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase">Ort. Masraf</span>
+                          <span className="font-extrabold text-secondary dark:text-secondary-fixed-dim">{hotspotDetails[selectedHotspot].price}</span>
+                        </div>
+                        <p className="mt-3 p-3 bg-white dark:bg-primary-container/60 border border-border/40 text-on-surface-variant dark:text-outline-variant rounded-xl italic text-[11px] leading-relaxed">
+                          "{hotspotDetails[selectedHotspot].expert}"
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="glass-card p-6 shadow-md">
               <h2 className="text-lg font-black tracking-tight mb-4 flex items-center gap-2">
                 <Activity className="h-5 w-5 text-accent" />

@@ -381,7 +381,7 @@ export default function Navbar() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md md:hidden animate-in fade-in duration-200">
           <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-            <span className="text-xl font-black bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+            <span className="text-xl font-black bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-transparent">
               arabayasor.com
             </span>
             <button onClick={() => setMobileMenuOpen(false)} className="rounded-full p-2 hover:bg-border/50 text-foreground">

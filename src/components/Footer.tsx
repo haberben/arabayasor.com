@@ -9,8 +9,8 @@ export default function Footer() {
           
           {/* Logo ve Tanım */}
           <div className="flex flex-col gap-4 md:col-span-2">
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-xl font-black tracking-tight text-transparent dark:from-blue-400 dark:to-indigo-300">
-              arabayasor<span className="text-blue-600 dark:text-blue-400">.com</span>
+            <span className="bg-gradient-to-r from-[#d4b27a] to-[#a37d4c] bg-clip-text text-xl font-black tracking-tight text-transparent">
+              arabayasor<span className="text-[#a37d4c] dark:text-[#d4b27a]">.com</span>
             </span>
             <p className="text-xs text-muted max-w-sm leading-relaxed">
               Otomobil sahipleri, ustalar, galericiler ve meraklıların araç kronik sorunlarını paylaştığı, değerlendirdiği ve yapay zeka desteğiyle doğru kararları hızlıca alabildiği bağımsız bir topluluk platformudur.

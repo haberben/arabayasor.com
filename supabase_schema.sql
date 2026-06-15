@@ -9,6 +9,16 @@ create table if not exists public.profiles (
     avatar_url text,
     role text default 'Yeni Üye'::text check (role in ('Yeni Üye', 'Aktif Üye', 'Uzman Kullanıcı', 'Usta', 'Master Usta', 'Efsane Usta')),
     xp integer default 0,
+    is_vip boolean default false,
+    is_admin boolean default false,
+    banner_url text,
+    business_name text,
+    business_address text,
+    latitude double precision,
+    longitude double precision,
+    social_media jsonb default '{}'::jsonb,
+    profile_views integer default 0,
+    monthly_views integer default 0,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -208,3 +218,22 @@ create policy "Allow public read access to badges" on public.badges for select u
 
 -- User Badges
 create policy "Allow public read access to user_badges" on public.user_badges for select using (true);
+
+-- Spare Parts
+create table if not exists public.spare_parts (
+    id uuid default gen_random_uuid() primary key,
+    user_id uuid references public.profiles(id) on delete cascade not null,
+    title text not null,
+    description text,
+    price numeric not null,
+    image_url text,
+    condition text,
+    part_number text,
+    brand text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.spare_parts enable row level security;
+create policy "Allow public read access to spare_parts" on public.spare_parts for select using (true);
+create policy "Allow authenticated users to manage spare_parts" on public.spare_parts for all using (auth.uid() = user_id);
+

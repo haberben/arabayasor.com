@@ -5,6 +5,22 @@ export interface Profile {
   avatar_url: string
   role: 'Yeni Üye' | 'Aktif Üye' | 'Uzman Kullanıcı' | 'Usta' | 'Master Usta' | 'Efsane Usta'
   xp: number
+  is_vip?: boolean
+  is_admin?: boolean
+  banner_url?: string
+  business_name?: string
+  business_address?: string
+  latitude?: number
+  longitude?: number
+  social_media?: {
+    instagram?: string
+    website?: string
+    phone?: string
+    twitter?: string
+    facebook?: string
+  }
+  profile_views?: number
+  monthly_views?: number
   created_at: string
 }
 

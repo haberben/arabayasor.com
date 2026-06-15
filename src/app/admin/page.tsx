@@ -94,9 +94,16 @@ export default function AdminDashboard() {
         router.push('/')
         return
       }
+      
+      const isUserAdmin = profile?.is_admin || profile?.role === 'Master Usta' || user.email?.toLowerCase() === 'ibrahmyldrim@yandex.com';
+      if (!isUserAdmin) {
+        router.push('/')
+        return
+      }
+      
       loadAdminData()
     }
-  }, [user, authLoading])
+  }, [user, authLoading, profile])
 
   const handleAddBrand = async (e: React.FormEvent) => {
     e.preventDefault()

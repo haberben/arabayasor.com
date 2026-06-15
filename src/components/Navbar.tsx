@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
+import { useAuth } from '@/context/AuthContext'
 
 const navLinks = [
   { href: '/ai-analiz', label: 'AI Analizi' },
@@ -13,6 +14,7 @@ export default function Navbar() {
   const router = useRouter()
   const pathname = usePathname()
   const [searchQuery, setSearchQuery] = useState('')
+  const { user, profile, loading, signOut } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
@@ -91,19 +93,64 @@ export default function Navbar() {
               <button className="px-2 py-0.5 text-[12px] font-medium text-on-surface-variant hover:text-primary">EN</button>
             </div>
 
-            <Link
-              href="/giris"
-              className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hidden sm:block"
-            >
-              Giriş Yap
-            </Link>
+            {loading ? (
+              <div className="w-6 h-6 rounded-full border-2 border-border-low border-b-primary animate-spin hidden sm:block"></div>
+            ) : user ? (
+              <div className="relative group hidden sm:block">
+                <button className="flex items-center gap-2 hover:opacity-85 transition-all outline-none">
+                  <div className="w-8 h-8 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-xs uppercase shadow-sm border border-border-low">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      (profile?.full_name || profile?.username || user.email || 'U').substring(0, 2)
+                    )}
+                  </div>
+                  <span className="font-label-md text-label-md text-on-surface hidden lg:block max-w-[100px] truncate">
+                    {profile?.full_name || profile?.username || 'Kullanıcı'}
+                  </span>
+                  <span className="material-symbols-outlined text-[16px] text-on-surface hidden lg:block">expand_more</span>
+                </button>
+                {/* Dropdown Menu */}
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-border-low rounded-xl shadow-lg py-2 hidden group-hover:block hover:block z-50 transition-all">
+                  <div className="px-4 py-2 border-b border-border-low">
+                    <p className="font-bold text-xs text-on-surface truncate">{profile?.full_name || 'Kullanıcı'}</p>
+                    <p className="text-[10px] text-on-surface-variant truncate">{user.email}</p>
+                    {(profile?.is_vip || user.email?.toLowerCase() === 'ibrahmyldrim@yandex.com') && (
+                      <span className="inline-block mt-1 bg-secondary-container text-on-secondary-container text-[9px] px-2 py-0.5 rounded-full font-bold">
+                        ★ VIP ÜYE
+                      </span>
+                    )}
+                  </div>
+                  <Link href={`/profil/${profile?.username || 'profil'}`} className="block px-4 py-2 text-xs text-on-surface hover:bg-surface-container-low transition-colors">
+                    Profilim
+                  </Link>
+                  {(profile?.is_admin || profile?.role === 'Master Usta' || user.email?.toLowerCase() === 'ibrahmyldrim@yandex.com') && (
+                    <Link href="/admin" className="block px-4 py-2 text-xs text-primary font-bold hover:bg-surface-container-low transition-colors">
+                      Yönetici Paneli
+                    </Link>
+                  )}
+                  <button onClick={signOut} className="w-full text-left px-4 py-2 text-xs text-error hover:bg-error-container/10 transition-colors border-t border-border-low mt-1">
+                    Çıkış Yap
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/giris"
+                  className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors hidden sm:block"
+                >
+                  Giriş Yap
+                </Link>
 
-            <Link
-              href="/kayit"
-              className="bg-primary text-on-primary px-5 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"
-            >
-              Kayıt Ol
-            </Link>
+                <Link
+                  href="/kayit"
+                  className="bg-primary text-on-primary px-5 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"
+                >
+                  Kayıt Ol
+                </Link>
+              </>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -147,14 +194,63 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <div className="flex gap-3 pt-4">
-              <Link href="/giris" className="flex-1 text-center py-2.5 border border-border-low rounded-lg font-label-md text-on-surface-variant">
-                Giriş Yap
-              </Link>
-              <Link href="/kayit" className="flex-1 text-center py-2.5 bg-primary text-on-primary rounded-lg font-label-md">
-                Kayıt Ol
-              </Link>
-            </div>
+            {loading ? (
+              <div className="w-8 h-8 rounded-full border-2 border-border-low border-b-primary animate-spin mx-auto"></div>
+            ) : user ? (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-3 p-3 bg-surface-container-low rounded-xl border border-border-low">
+                  <div className="w-10 h-10 rounded-full bg-secondary-container text-on-secondary-container flex items-center justify-center font-bold text-sm uppercase shadow-sm shrink-0">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      (profile?.full_name || profile?.username || user.email || 'U').substring(0, 2)
+                    )}
+                  </div>
+                  <div className="truncate min-w-0">
+                    <p className="font-bold text-xs text-on-surface truncate">{profile?.full_name || 'Kullanıcı'}</p>
+                    <p className="text-[10px] text-on-surface-variant truncate">{user.email}</p>
+                    {(profile?.is_vip || user.email?.toLowerCase() === 'ibrahmyldrim@yandex.com') && (
+                      <span className="inline-block mt-0.5 bg-secondary-container text-on-secondary-container text-[9px] px-2 py-0.5 rounded-full font-bold">
+                        ★ VIP ÜYE
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <Link 
+                    href={`/profil/${profile?.username || 'profil'}`} 
+                    onClick={() => setMobileOpen(false)}
+                    className="text-center py-2.5 bg-surface-container-high border border-border-low rounded-lg text-xs font-bold text-on-surface block"
+                  >
+                    Profilim
+                  </Link>
+                  {(profile?.is_admin || profile?.role === 'Master Usta' || user.email?.toLowerCase() === 'ibrahmyldrim@yandex.com') && (
+                    <Link 
+                      href="/admin" 
+                      onClick={() => setMobileOpen(false)}
+                      className="text-center py-2.5 bg-secondary-container/20 border border-secondary-container/30 rounded-lg text-xs font-bold text-secondary block"
+                    >
+                      Yönetici
+                    </Link>
+                  )}
+                </div>
+                <button 
+                  onClick={() => { signOut(); setMobileOpen(false); }} 
+                  className="w-full text-center py-2.5 bg-error-container/10 border border-error-container/20 text-error rounded-lg text-xs font-bold"
+                >
+                  Çıkış Yap
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-3 pt-4">
+                <Link href="/giris" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2.5 border border-border-low rounded-lg font-label-md text-on-surface-variant text-xs font-bold">
+                  Giriş Yap
+                </Link>
+                <Link href="/kayit" onClick={() => setMobileOpen(false)} className="flex-1 text-center py-2.5 bg-primary text-on-primary rounded-lg font-label-md text-xs font-bold">
+                  Kayıt Ol
+                </Link>
+              </div>
+            )}
 
             {/* Language */}
             <div className="flex items-center gap-2 pt-2">

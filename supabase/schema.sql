@@ -13,6 +13,16 @@ create table public.profiles (
     avatar_url text,
     role text not null default 'Yeni Üye', -- Yeni Üye, Aktif Üye, Uzman Kullanıcı, Usta, Master Usta, Efsane Usta
     xp integer not null default 0,
+    is_vip boolean not null default false,
+    is_admin boolean not null default false,
+    banner_url text,
+    business_name text,
+    business_address text,
+    latitude double precision,
+    longitude double precision,
+    social_media jsonb default '{}'::jsonb,
+    profile_views integer not null default 0,
+    monthly_views integer not null default 0,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -518,4 +528,24 @@ insert into public.problem_reports (generation_id, title, description) values
 ((select id from public.generations where slug = 'b8'), 'TFSI Piston Segman Aşınması', 'Yağ tüketiminin aşırı derecede artması ve silindir basınç kaybı.'),
 ((select id from public.generations where slug = 'megane-4'), 'EDC Beyin Arızası', 'Şanzıman beyninin aşırı ısınıp geçici olarak vitesleri devre dışı bırakması.')
 on conflict do nothing;
+
+
+-- 9. YEDEK PARÇA MAĞAZASI TABLOSU (Spare Parts)
+create table public.spare_parts (
+    id uuid default gen_random_uuid() primary key,
+    user_id uuid references public.profiles(id) on delete cascade not null,
+    title text not null,
+    description text,
+    price numeric not null,
+    image_url text,
+    condition text, -- Yeni, İkinci El, Revizyonlu
+    part_number text, -- OEM No
+    brand text, -- Parça markası
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.spare_parts enable row level security;
+create policy "Herkes yedek parçaları görüntüleyebilir" on public.spare_parts for select using (true);
+create policy "Kullanıcılar kendi yedek parçalarını yönetebilir" on public.spare_parts for all using (auth.uid() = user_id);
+
 

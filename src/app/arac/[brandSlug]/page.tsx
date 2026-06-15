@@ -10,7 +10,7 @@ import { ChevronRight, ShieldAlert, Star, BookOpen, Activity } from 'lucide-reac
 import type { Metadata, ResolvingMetadata } from 'next'
 
 interface Props {
-  params: { brandSlug: string }
+  params: Promise<{ brandSlug: string }>
 }
 
 // SEO optimizasyonu için dinamik Meta Verileri (Title & Description) oluşturur
@@ -18,7 +18,8 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const brandSlug = params.brandSlug
+  const resolvedParams = await params
+  const brandSlug = resolvedParams.brandSlug
   let brandName = brandSlug.toUpperCase()
 
   try {
@@ -100,7 +101,8 @@ async function getBrandPageData(brandSlug: string) {
 }
 
 export default async function BrandPage({ params }: Props) {
-  const data = await getBrandPageData(params.brandSlug)
+  const resolvedParams = await params
+  const data = await getBrandPageData(resolvedParams.brandSlug)
 
   if (!data) {
     notFound()

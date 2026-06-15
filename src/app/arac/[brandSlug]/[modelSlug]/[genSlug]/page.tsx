@@ -11,14 +11,15 @@ import GenerationDetailClient from '@/components/GenerationDetailClient'
 import type { Metadata, ResolvingMetadata } from 'next'
 
 interface Props {
-  params: { brandSlug: string; modelSlug: string; genSlug: string }
+  params: Promise<{ brandSlug: string; modelSlug: string; genSlug: string }>
 }
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { brandSlug, modelSlug, genSlug } = params
+  const resolvedParams = await params
+  const { brandSlug, modelSlug, genSlug } = resolvedParams
   let titleName = `${brandSlug.toUpperCase()} ${modelSlug.toUpperCase()} ${genSlug.toUpperCase()}`
 
   try {
@@ -167,7 +168,8 @@ async function getGenerationPageData(brandSlug: string, modelSlug: string, genSl
 }
 
 export default async function GenerationPage({ params }: Props) {
-  const data = await getGenerationPageData(params.brandSlug, params.modelSlug, params.genSlug)
+  const resolvedParams = await params
+  const data = await getGenerationPageData(resolvedParams.brandSlug, resolvedParams.modelSlug, resolvedParams.genSlug)
 
   if (!data) {
     notFound()
@@ -184,9 +186,9 @@ export default async function GenerationPage({ params }: Props) {
           initialGeneration={generation}
           initialReviews={reviews}
           initialProblems={problems}
-          brandSlug={params.brandSlug}
-          modelSlug={params.modelSlug}
-          genSlug={params.genSlug}
+          brandSlug={resolvedParams.brandSlug}
+          modelSlug={resolvedParams.modelSlug}
+          genSlug={resolvedParams.genSlug}
         />
       </main>
 

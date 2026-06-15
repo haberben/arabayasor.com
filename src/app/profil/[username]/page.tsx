@@ -1,18 +1,18 @@
 'use client'
 
-import React from 'react'
+import React, { use } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     username: string
-  }
+  }>
 }
 
 export default function ProfilePage({ params }: PageProps) {
-  const { username } = params
+  const { username } = use(params)
 
   const profile = {
     username: username === 'usta-selim-y' ? 'usta_selim_y' : username,

@@ -2,9 +2,9 @@ import React from 'react'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
+
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
-import HomeSearch from '@/components/HomeSearch'
 import { createClient } from '@/lib/supabase-server'
 import { mockBrands, mockReviews, mockProblemReports } from '@/lib/mock-data'
 import { Brand } from '@/types/database'
@@ -14,11 +14,7 @@ async function getHomepageData() {
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
   if (!supabaseUrl || !supabaseKey) {
-    return {
-      brands: mockBrands,
-      reviews: mockReviews,
-      recentProblems: mockProblemReports.slice(0, 5)
-    }
+    return { brands: mockBrands, reviews: mockReviews, recentProblems: mockProblemReports.slice(0, 1) }
   }
 
   try {
@@ -28,393 +24,295 @@ async function getHomepageData() {
       .from('reviews')
       .select('*, profiles(*), generations(*, models(*, brands(*)))')
       .order('created_at', { ascending: false })
-      .limit(3)
+      .limit(2)
     const { data: problems } = await supabase
       .from('problem_reports')
       .select('*, generations(*, models(*, brands(*)))')
-      .limit(5)
+      .order('yes_votes', { ascending: false })
+      .limit(1)
 
     return {
       brands: brands && brands.length > 0 ? (brands as Brand[]) : mockBrands,
       reviews: reviews && reviews.length > 0 ? (reviews as any[]) : mockReviews,
-      recentProblems: problems && problems.length > 0 ? (problems as any[]) : mockProblemReports.slice(0, 5)
+      recentProblems: problems && problems.length > 0 ? (problems as any[]) : mockProblemReports.slice(0, 1)
     }
   } catch (err) {
-    console.error('Supabase fetching failed, using mock data:', err)
-    return {
-      brands: mockBrands,
-      reviews: mockReviews,
-      recentProblems: mockProblemReports.slice(0, 5)
-    }
+    return { brands: mockBrands, reviews: mockReviews, recentProblems: mockProblemReports.slice(0, 1) }
   }
 }
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, total = 5 }: { rating: number; total?: number }) {
   return (
-    <div className="flex gap-0.5">
-      {[...Array(5)].map((_, i) => (
-        <span
-          key={i}
-          className="material-symbols-outlined text-[18px]"
-          style={{
-            color: i < rating ? 'var(--success)' : 'var(--border-hover)',
-            fontVariationSettings: i < rating ? "'FILL' 1" : "'FILL' 0"
-          }}
-        >
-          star
-        </span>
-      ))}
+    <div className="flex items-center gap-1 text-trust-green">
+      {Array.from({ length: total }).map((_, i) => {
+        const filled = i < Math.floor(rating)
+        const half = !filled && i < rating
+        return (
+          <span
+            key={i}
+            className="material-symbols-outlined text-[18px]"
+            style={{ fontVariationSettings: filled ? "'FILL' 1" : half ? "'FILL' 0.5" : "'FILL' 0'" }}
+          >
+            {half ? 'star_half' : 'star'}
+          </span>
+        )
+      })}
     </div>
   )
 }
 
-const STAT_ITEMS = [
-  { value: '12.400+', label: 'Kayıtlı Araç' },
-  { value: '84.000+', label: 'Kullanıcı Yorumu' },
-  { value: '3.200+', label: 'Kronik Sorun' },
-  { value: '4.8★', label: 'Ortalama Puan' },
-]
-
-const FILTER_LINKS = [
-  { icon: 'calendar_today', label: 'Model Yılı' },
-  { icon: 'ev_station', label: 'Yakıt Tipi' },
-  { icon: 'settings_input_component', label: 'Şanzıman' },
-  { icon: 'enable', label: 'Motor Hacmi' },
-  { icon: 'settings_input_antenna', label: 'Çekiş Tipi' },
-]
+function timeAgo(dateStr: string) {
+  const d = new Date(dateStr)
+  const diff = (Date.now() - d.getTime()) / 1000
+  if (diff < 3600) return `${Math.floor(diff / 60)} dakika önce`
+  if (diff < 86400) return `${Math.floor(diff / 3600)} saat önce`
+  return `${Math.floor(diff / 86400)} gün önce`
+}
 
 export default async function HomePage() {
   const { brands, reviews, recentProblems } = await getHomepageData()
+
+  const brandLogos: Record<string, string> = {
+    bmw: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAG0o0dfPguWsaNdUHCddE2nvQfUcx1794MJeRkZSlTP48-nUOGpDrcSfx1p5fH-uAG1FHJkMZI6maSsX4jk3GJcfrP6u3t7KTGGNbEDSGPsO8Z4v8A_2ggfKMbFOTLug75HTA-lYYna4OBca_B7NT0HUI_hvh5tbg5Tec23nGdizT5ClK6yqFgDOfvatS0y_d43RweYxcv_8RHF-ui3eIJHWUDGQzoGmnsP-GeNLZNu8zEPsM0LXnzeyDBQLaf9mFQ55Enj3ielzA',
+    'mercedes-benz': 'https://lh3.googleusercontent.com/aida-public/AB6AXuBbA5LvLLqBjTZHmKkMfUH8t1kMC2Rt1E8uWAjvGVhdjSYI-bBQJUjyl_YBttkXtWkpRBKfpXokN96DMKi90JHSoh39meTprgymx3-rpihdbk7_DSos1LPRh6foznUwumEVK8YZZOilMGB7ZngspJ9QzMC-7vL12WZZG8yc4RxRJsilQjitZGqvqpEwCDBEHKQTEWVzPrK9_4IWkXAeajQqrp18pvJGDwKtRKAi8EZsXqi_hzhRB2VlUDS6hCNDsVfsq6RfNZAKmNk',
+    audi: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCn3J6N0ZA4yCzgHU6ZCtTrAjYZ_lvT8Q4pe3UibTnnU4vLwWcPviG3c-W68nGxEQfcvBwwkkd3_gx1w1eoLSwAgf8DJSs6RUcgWohr1dawcB2A_4u5qWfz2gg0aFHiKGMeD-mjXLM4pDmjRRxXHrD8qCkLBxfPgSe130AtC-OAY8P5DMfb6249CkmjrlwOYPWUnan0LSVo0ZFIwquzzO3HRdrLELhq8I0KhiC_FvilR4uo8kX9PkttdUcKblBX0uExychuo_XyzyY',
+    toyota: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC9jZi7665ur0ez_4FxtiPROL-B3OdHys3eOPCWMSPlVBT2DanQsEvT89bAaEcAfNx1jqQyCIZ5Q5CGpyNI6MjHgGBOdA2fq1tgr5OXpcqH-USth3VlFQxDXEsG2QkJ7zu1-H7H2q5GKI2khoxKAbeth8XRjamE0zFZ1-HWAjqQe0Ab91pso4jbTQm2h2TTY7YM7gVzpE9CQ2uZeFLAYRWrKzl2JrwUwJGyBzVD20K5wKusFSS7aNQpabO35iiFyVXo2_zituh_N0s',
+    renault: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAbt1lYZ8-eh0ig8zlX5v02_jSJDiABCRI3AGA7ArCDTEfgzK20OBtbCA4CQ-soNFJubudBYus-C6KujQbZqCwL_UuEASEOEJYnPFDIqQrOwG2QJbTt43LO6h8fIpQYC8-2GBPbZeoGCX75htWBfuYX8expHfHESZNuo_07tI_3ANtX7wojjSRROYfB93l5x4_WC3POLbt5E_FSuGvHEALenHrEeyP_QJQTCq3yAROrPlyZu42mMUPpvnPfck04bp1zgFAdX1Ovyl8',
+    volkswagen: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBVKewkWRb4yKElHUOYi0-hC41aPp4P4Nnu7FKNRaJg5vLDD2Z0t-0CF3QrutliG4bdz4I87eroVYX8XZl5jFxvpinaM4tHfyWRTL0ur1Id-9DRRTcHGySrq4Ufi_aZEnK4REPIvHYtJ1iNUpaksWHrFEDSFBla5JZhjkDlaMsnpxHPh4o5_al371lki4sCOIVSTIz4tuS9XQm63dWna1K8IhXeHMOa94yxaTtPLMfheSwgwknHVm95V3q0194puT94UfkGzOmksQs',
+  }
+
+  const getBrandLogo = (slug: string) => brandLogos[slug.toLowerCase()] || brandLogos['bmw']
 
   return (
     <>
       <Navbar />
 
-      {/* ================================================
-          HERO SECTION
-          ================================================ */}
-      <section className="hero-bg relative py-24 md:py-32">
-        <div className="relative z-10 mx-auto max-w-[1400px] px-4 md:px-8 text-center">
+      {/* Hero Section */}
+      <section className="relative bg-primary-container text-on-primary py-24 overflow-hidden">
+        {/* Subtle bg texture */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, #fea619 0%, transparent 50%), radial-gradient(circle at 80% 20%, #4a6cf7 0%, transparent 50%)'
+        }} />
 
-          {/* Eyebrow Badge */}
-          <div className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border px-4 py-1.5 mb-8"
-            style={{ background: 'rgba(254,166,25,0.12)', borderColor: 'rgba(254,166,25,0.3)', color: '#fea619' }}
-          >
-            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
-            <span className="text-xs font-bold tracking-wider uppercase">Türkiye'nin #1 Otomobil Platformu</span>
-          </div>
-
-          {/* Hero Headline */}
-          <h1
-            className="animate-fade-in-up animate-delay-100 font-black tracking-tight mb-6 mx-auto max-w-3xl leading-[1.1]"
-            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', color: '#ffffff' }}
-          >
-            Aracını Sor,{' '}
-            <span style={{ color: 'var(--accent)' }}>Gerçeği</span>{' '}
-            Öğren
+        <div className="max-w-[1280px] mx-auto px-8 relative z-10 text-center">
+          <h1 className="font-display-lg text-display-lg mb-8 leading-tight">
+            Aracını Sor, Gerçeği Öğren
           </h1>
-
-          {/* Hero Subtitle */}
-          <p
-            className="animate-fade-in-up animate-delay-200 text-base md:text-lg mb-10 mx-auto max-w-xl leading-relaxed"
-            style={{ color: 'rgba(200, 215, 235, 0.8)' }}
-          >
-            Binlerce kullanıcı deneyimi ve teknik raporlarla otomobil dünyasının şeffaf yüzü.
-            İlan linkini yapıştır, yapay zeka analiz etsin.
+          <p className="font-body-lg text-body-lg text-surface-variant mb-12 max-w-2xl mx-auto">
+            Binlerce kullanıcı deneyimi ve teknik raporlarla otomobil dünyasının şeffaf
+            yüzü. İlan linkini yapıştır, yapay zeka analiz etsin.
           </p>
 
-          {/* Search Box */}
-          <div className="animate-fade-in-up animate-delay-300">
-            <HomeSearch />
-          </div>
-
-          {/* Stats Row */}
-          <div className="animate-fade-in-up animate-delay-300 flex flex-wrap justify-center gap-6 md:gap-10 mt-12">
-            {STAT_ITEMS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl font-black" style={{ color: 'var(--accent)' }}>{stat.value}</div>
-                <div className="text-xs font-medium mt-0.5" style={{ color: 'rgba(180,200,225,0.7)' }}>{stat.label}</div>
+          {/* Search Pill */}
+          <div className="max-w-3xl mx-auto relative">
+            <form action="/arama" method="get">
+              <div className="flex bg-white rounded-full p-2 shadow-xl focus-within:ring-4 ring-secondary-container/30 transition-all">
+                <span className="material-symbols-outlined text-outline ml-4 self-center">search</span>
+                <input
+                  name="q"
+                  className="w-full border-none focus:ring-0 text-on-surface font-body-md text-body-md py-4 px-4 bg-transparent outline-none"
+                  placeholder="BMW 320i kronik sorunlar"
+                  type="text"
+                />
+                <button
+                  type="submit"
+                  className="bg-secondary-container text-on-secondary-container px-8 rounded-full font-label-md text-label-md hover:scale-105 active:scale-95 transition-all"
+                >
+                  Ara
+                </button>
               </div>
-            ))}
+            </form>
           </div>
         </div>
       </section>
 
-      {/* ================================================
-          MAIN CONTENT
-          ================================================ */}
-      <main
-        className="mx-auto max-w-[1400px] px-4 md:px-8 py-12 flex gap-8"
-        style={{ alignItems: 'flex-start' }}
-      >
-
-        {/* ── SIDEBAR ── */}
-        <aside
-          className="hidden lg:flex flex-col w-[260px] shrink-0 sticky top-20 rounded-2xl border overflow-hidden"
-          style={{ background: 'var(--card)', borderColor: 'var(--border)', maxHeight: 'calc(100vh - 100px)' }}
-        >
-          {/* Sidebar Header */}
-          <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
-            <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Detaylı Filtreler</h3>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>Araç sonuçlarını daraltın</p>
+      {/* Main Content */}
+      <main className="max-w-[1280px] mx-auto px-8 py-12 flex gap-4">
+        {/* Filter Sidebar */}
+        <aside className="bg-surface-container-low h-fit w-[280px] sticky top-20 hidden lg:flex flex-col p-4 space-y-1 rounded-xl border border-border-low overflow-y-auto flex-shrink-0">
+          <div className="mb-4">
+            <h3 className="font-title-md text-title-md text-on-surface flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px]">tune</span>
+              Detaylı Filtreler
+            </h3>
+            <p className="font-label-md text-label-md text-on-surface-variant opacity-70 mt-1">
+              Araç sonuçlarını daraltın
+            </p>
           </div>
 
-          {/* Sidebar Links */}
-          <nav className="p-3 flex flex-col gap-0.5 flex-1 overflow-y-auto custom-scrollbar">
-            {FILTER_LINKS.map((item, i) => (
+          <nav className="space-y-1">
+            {[
+              { icon: 'calendar_today', label: 'Model Yılı', active: false },
+              { icon: 'ev_station', label: 'Yakıt Tipi', active: false },
+              { icon: 'settings_input_component', label: 'Şanzıman', active: false },
+              { icon: 'speed', label: 'Motor Hacmi', active: false },
+              { icon: 'settings_input_antenna', label: 'Çekiş Tipi', active: false },
+            ].map((item) => (
               <Link
                 key={item.label}
-                href="/arama"
-                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
-                  i === 0 ? 'font-bold' : 'hover:bg-[var(--surface)]'
+                href={`/arama?filter=${item.label}`}
+                className={`flex items-center gap-3 p-3 rounded-lg transition-all font-label-md text-label-md ${
+                  item.active
+                    ? 'bg-secondary-container text-on-secondary-container font-bold translate-x-1'
+                    : 'text-on-surface-variant hover:bg-surface-variant'
                 }`}
-                style={{
-                  background: i === 0 ? 'var(--accent-subtle)' : undefined,
-                  color: i === 0 ? 'var(--accent)' : 'var(--muted)',
-                }}
               >
-                <span
-                  className="material-symbols-outlined text-[20px]"
-                  style={{ color: i === 0 ? 'var(--accent)' : 'var(--muted-foreground)' }}
-                >
-                  {item.icon}
-                </span>
+                <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          {/* Apply Button */}
-          <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
-            <Link
-              href="/arama"
-              className="btn-primary block w-full text-center py-3 rounded-xl text-sm"
-            >
-              Filtreleri Uygula
-            </Link>
-          </div>
+          <Link
+            href="/arama"
+            className="mt-6 bg-primary text-on-primary w-full py-4 rounded-xl font-label-md text-label-md text-center hover:opacity-90 transition-all block"
+          >
+            Filtreleri Uygula
+          </Link>
         </aside>
 
-        {/* ── MAIN FEED ── */}
-        <div className="flex-1 min-w-0 flex flex-col gap-10">
+        {/* Content Area */}
+        <div className="flex-1 space-y-12 min-w-0">
 
-          {/* AI İlan Analizi */}
-          <section
-            className="rounded-2xl border p-6 md:p-8 relative overflow-hidden"
-            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
-          >
-            {/* Decorative glow */}
-            <div
-              className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, rgba(254,166,25,0.06) 0%, transparent 70%)',
-                transform: 'translate(30%, -30%)'
-              }}
-            />
-            <div className="relative z-10">
-              <div className="flex items-start gap-4 mb-6">
-                <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
-                  style={{ background: 'var(--accent-subtle)', border: '1px solid rgba(254,166,25,0.25)' }}
-                >
-                  <span
-                    className="material-symbols-outlined text-[22px]"
-                    style={{ color: 'var(--accent)', fontVariationSettings: "'FILL' 1" }}
-                  >
-                    auto_awesome
-                  </span>
-                </div>
-                <div>
-                  <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>AI İlan Analizi</h2>
-                  <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
-                    İlan linkini girin, AI teknik durumu ve piyasayı özetlesin.
-                  </p>
-                </div>
+          {/* AI Ilan Analizi */}
+          <section className="bg-white border border-border-low rounded-xl p-8 shadow-sm">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-secondary-container/20 rounded-full flex items-center justify-center text-secondary-container flex-shrink-0">
+                <span className="material-symbols-outlined">auto_awesome</span>
               </div>
-              <form action="/ai-analiz" method="GET" className="flex gap-3">
-                <input
-                  name="url"
-                  className="themed-input flex-1"
-                  placeholder="https://www.sahibinden.com/ilan/..."
-                  type="text"
-                />
-                <button
-                  type="submit"
-                  className="btn-accent shrink-0 px-6 py-2.5 rounded-xl text-sm font-bold"
-                >
-                  Analiz Et
-                </button>
-              </form>
+              <div>
+                <h2 className="font-title-md text-title-md text-on-surface">AI İlan Analizi</h2>
+                <p className="font-body-md text-body-md text-on-surface-variant text-sm">
+                  İlan linkini girin, AI teknik durumu ve piyasayı özetlesin.
+                </p>
+              </div>
             </div>
+            <form action="/ai-analiz" method="get" className="flex gap-4">
+              <input
+                name="url"
+                className="flex-1 bg-surface-container-low border border-border-low rounded-lg px-4 py-3 outline-none focus:border-primary transition-all font-body-md text-body-md text-sm"
+                placeholder="https://www.sahibinden.com/ilan/..."
+                type="text"
+              />
+              <button
+                type="submit"
+                className="bg-primary text-on-primary px-8 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"
+              >
+                Analiz Et
+              </button>
+            </form>
           </section>
 
           {/* Popüler Markalar */}
           <section>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="section-title">Popüler Markalar</h2>
-              <Link
-                href="/arama"
-                className="text-sm font-semibold transition-colors hover:opacity-80"
-                style={{ color: 'var(--accent)' }}
-              >
-                Tümünü Gör →
+            <div className="flex justify-between items-end mb-6">
+              <h2 className="font-title-md text-title-md text-on-surface">Popüler Markalar</h2>
+              <Link href="/arama" className="text-secondary font-label-md text-label-md hover:underline">
+                Tümünü Gör
               </Link>
             </div>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-              {brands.map((brand) => {
-                const localLogo = `/logos/${brand.slug.toLowerCase()}.svg`
-                return (
-                  <Link
-                    key={brand.id}
-                    href={`/arac/${brand.slug}`}
-                    className="premium-card flex flex-col items-center justify-center gap-3 p-4 cursor-pointer"
-                  >
-                    <img
-                      alt={brand.name}
-                      className="w-10 h-10 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
-                      src={brand.logo_url || localLogo}
-                    />
-                    <span
-                      className="text-xs font-semibold text-center truncate w-full"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {brand.name}
-                    </span>
-                  </Link>
-                )
-              })}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+              {brands.slice(0, 6).map((brand: any) => (
+                <Link
+                  key={brand.id}
+                  href={`/arac/${brand.slug}`}
+                  className="bg-white border border-border-low p-5 rounded-xl text-center hover:shadow-md transition-all group cursor-pointer"
+                >
+                  <img
+                    alt={brand.name}
+                    src={getBrandLogo(brand.slug)}
+                    className="w-12 h-12 mx-auto mb-3 grayscale group-hover:grayscale-0 transition-all object-contain"
+                  />
+                  <span className="font-label-md text-label-md text-on-surface text-xs">{brand.name}</span>
+                </Link>
+              ))}
             </div>
           </section>
 
           {/* Kronik Sorun Alarmı */}
           {recentProblems.length > 0 && (
-            <section
-              className="rounded-2xl border-l-4 p-5 flex items-start gap-4"
-              style={{
-                background: 'rgba(254,166,25,0.05)',
-                borderLeftColor: 'var(--accent)',
-                border: '1px solid rgba(254,166,25,0.15)',
-                borderLeft: '4px solid var(--accent)'
-              }}
-            >
-              <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                style={{ background: 'rgba(254,166,25,0.12)' }}
-              >
-                <span
-                  className="material-symbols-outlined text-[20px]"
-                  style={{ color: 'var(--accent)', fontVariationSettings: "'FILL' 1" }}
-                >
-                  report_problem
-                </span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
-                    Kronik Sorun Alarmı
-                  </span>
+            <section className="bg-orange-50 border-l-4 border-secondary p-6 rounded-r-xl">
+              <div className="flex gap-4">
+                <span className="material-symbols-outlined text-secondary text-[24px] flex-shrink-0">report_problem</span>
+                <div>
+                  <h4 className="font-label-md text-label-md text-secondary">
+                    Kronik Sorun Alarmı: {recentProblems[0]?.title || 'BMW N47 Motor'}
+                  </h4>
+                  <p className="font-caption text-caption text-on-surface-variant mt-1 text-sm">
+                    {recentProblems[0]?.description || 'Bu motor tipinde zincir kopma riski raporlanmıştır. 150.000 km üstü araçlarda kontrol önerilir.'}
+                  </p>
                 </div>
-                <h4 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>
-                  {recentProblems[0].generations?.models?.brands?.name || 'BMW'} — {recentProblems[0].title}
-                </h4>
-                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
-                  {recentProblems[0].description}
-                </p>
               </div>
             </section>
           )}
 
           {/* Son Kullanıcı Değerlendirmeleri */}
           <section>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="section-title">Son Kullanıcı Değerlendirmeleri</h2>
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="font-title-md text-title-md text-on-surface">Son Kullanıcı Değerlendirmeleri</h2>
               <Link
-                href="/arama"
-                className="flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-all hover:bg-[var(--surface)]"
-                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                href="/deneyim-paylas"
+                className="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:opacity-90 transition-all"
               >
-                <span className="material-symbols-outlined text-[16px]" style={{ color: 'var(--accent)' }}>add</span>
+                <span className="material-symbols-outlined text-[18px]">add</span>
                 Deneyimini Paylaş
               </Link>
             </div>
 
-            <div className="flex flex-col gap-4">
-              {reviews.map((rev: any) => {
-                const total =
-                  (rev.rating_engine || 0) +
-                  (rev.rating_gearbox || 0) +
-                  (rev.rating_electric || 0) +
-                  (rev.rating_fuel || 0) +
-                  (rev.rating_comfort || 0) +
-                  (rev.rating_parts || 0) +
-                  (rev.rating_mechanic || 0)
-                const avgRating = (total / 7).toFixed(1)
-
-                const genName = rev.generations?.name || 'F30'
-                const modelName = rev.generations?.models?.name || '3 Serisi'
-                const brandName = rev.generations?.models?.brands?.name || 'BMW'
+            <div className="space-y-4">
+              {reviews.slice(0, 2).map((review: any) => {
+                const avgRating = Math.round(
+                  ((review.rating_engine || 4) + (review.rating_gearbox || 4) + (review.rating_comfort || 4)) / 3
+                )
+                const genName = review.generations?.name || review.generation_id || 'F30'
+                const modelName = review.generations?.models?.name || '3 Serisi'
+                const brandName = review.generations?.models?.brands?.name || 'BMW'
+                const year = review.created_at ? new Date(review.created_at).getFullYear() : 2024
+                const username = review.profiles?.username || 'anonim'
+                const initials = (review.profiles?.full_name || 'A').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 
                 return (
                   <article
-                    key={rev.id}
-                    className="premium-card p-5 md:p-6"
+                    key={review.id}
+                    className="bg-white border border-border-low p-6 rounded-xl hover:border-secondary transition-all cursor-pointer"
                   >
-                    {/* Review Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex flex-col gap-1">
-                        <StarRating rating={Math.round(parseFloat(avgRating))} />
-                        <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>
-                          {avgRating} / 5
-                        </span>
+                    <div className="flex justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <StarRating rating={avgRating} />
+                        <span className="ml-2 text-on-surface font-label-md text-label-md">{avgRating} / 5</span>
                       </div>
-                      <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                        {new Date(rev.created_at || '2026-06-12').toLocaleDateString('tr-TR')}
+                      <span className="font-caption text-caption text-on-surface-variant">
+                        {review.created_at ? timeAgo(review.created_at) : '2 saat önce'}
                       </span>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="text-base font-bold mb-2" style={{ color: 'var(--foreground)' }}>
-                      {brandName} {modelName} {genName} Deneyimi
+                    <h3 className="font-title-md text-title-md mb-2 text-on-surface" style={{ fontSize: '18px' }}>
+                      {brandName} {genName} - {year} Deneyimi
                     </h3>
-
-                    {/* Content */}
-                    <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--muted)' }}>
-                      {rev.content}
+                    <p className="font-body-md text-body-md text-on-surface-variant mb-4 text-sm line-clamp-3">
+                      {review.content}
                     </p>
 
-                    {/* Footer */}
-                    <div
-                      className="flex items-center justify-between pt-4 border-t"
-                      style={{ borderColor: 'var(--border)' }}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div
-                          className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm"
-                          style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
-                        >
-                          {(rev.profiles?.username || 'U')[0].toUpperCase()}
+                    <div className="flex justify-between items-center pt-4 border-t border-border-low">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary text-sm">
+                          {initials}
                         </div>
-                        <div>
-                          <span className="text-sm font-semibold block" style={{ color: 'var(--foreground)' }}>
-                            @{rev.profiles?.username || 'user'}
+                        <span className="font-label-md text-label-md text-on-surface text-sm">{username}</span>
+                        {review.profiles?.role && (
+                          <span className="bg-trust-green/10 text-trust-green px-2 py-0.5 rounded text-[10px] font-bold uppercase">
+                            Doğrulanmış Sahibi
                           </span>
-                        </div>
-                        <span className="trust-badge">Doğrulanmış</span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-[var(--accent)]"
-                          style={{ color: 'var(--muted)' }}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">thumb_up</span>
-                          24
+                      <div className="flex gap-4">
+                        <button className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-all">
+                          <span className="material-symbols-outlined text-[18px]">thumb_up</span>
+                          <span className="text-[12px]">24</span>
                         </button>
-                        <button
-                          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-[var(--accent)]"
-                          style={{ color: 'var(--muted)' }}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
-                          3
+                        <button className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-all">
+                          <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+                          <span className="text-[12px]">{review.comments_count || 0}</span>
                         </button>
                       </div>
                     </div>
@@ -425,62 +323,52 @@ export default async function HomePage() {
           </section>
 
           {/* Topluluk Uzmanları */}
-          <section className="pb-4">
-            <h2 className="section-title mb-5">Topluluk Uzmanları</h2>
+          <section className="pb-12">
+            <h2 className="font-title-md text-title-md text-on-surface mb-6">Topluluk Uzmanları</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 {
                   name: 'Usta Selim Y.',
-                  role: '25+ Yıl Motor Mekanik Uzmanı',
-                  tags: ['BMW Uzmanı', '1.2B Cevap'],
-                  src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEZoNKuZEIDAyWkGovLRyAIzKQbu2mUsHlgnV46eC56vrBAc2Cbzp1KNj8a4UZznfh0dSusv45DySdaStB7Mn7et5vEOoKBHsZiGCpy-oI8BcUvt4ivPlx3YUoc1S6Ag9HCg6URJp4OE-QDt8CeOX_z-0QEsRpucwo9kO6FUkYt4lVwXwwttDe3q6ph7ZgaDmY6fTuTA_nKgLERlQ5bmpmwXeKVYMb-PptBJ6a6aTQIeztRsWOkWenaoupHBLEv8yHbIDvYpiLsbw'
+                  title: '25+ Yıl Motor Mekanik Uzmanı',
+                  avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEZoNKuZEIDAyWkGovLRyAIzKQbu2mUsHlgnV46eC56vrBAc2Cbzp1KNj8a4UZznfh0dSusv45DySdaStB7Mn7et5vEYoc1S6Ag9HCg6URJp4OE-QDt8CeOX_z-0QEsRpucwo9kO6FUkYt4lVwXwwttDe3q6ph7ZgaDmY6fTuTA_nKgLERlQ5bmpmwXeKVYMb-PptBJ6a6aTQIeztRsWOkWenaoupHBLEv8yHbIDvYpiLsbw',
+                  badges: ['BMW UZMANI', '1.2B CEVAP'],
+                  slug: 'usta-selim-y'
                 },
                 {
                   name: 'Expert Ayşe B.',
-                  role: 'Ekspertiz ve Piyasa Analisti',
-                  tags: ['VAG Grubu', '900+ Cevap'],
-                  src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA94PpYFl9s16bPekLsOvSEfrm9MkWFyjleDFTPNZ0lh2IaZHuSIONptjRqvHZXytD1vbm0MxTm7fA4PYsfl_6MQ1YxCWN6jwqAON9PZ1Q-w6gOzDlycMyEpnyr6kETclL7xi0L3xwx4bAlmVw4vh01k8XKa8zYZohSobLojj1iAPlrG4wgaGJa5XzxVd_N-G4C5gvUbO1RPkEVvXJ_0ig8SCuyIe2u8tfXCX31OuyWfeX4iQeogVpVLxASA0uutwEmXyJRyEhlv4'
+                  title: 'Ekspertiz ve Piyasa Analisti',
+                  avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA94PpYFl9s16bPekLsOvSEfrm9MkWFyjleDFTPNZ0lh2IaZHuSIONptjRqvHZXytD1vbm0MxTm7fA4PYsfl_6MQ1YxCWN6jwqAON9PZ1Q-w6gOzDlycMyEpnyr6kETclL7xi0L3xwx4bAlmVw4vh01k8XKa8zYZohSobLojj1iAPlrG4wgaGJa5XzxVd_N-G4C5gvUbO1RPkEVvXJ_0ig8SCuyIe2u8tfXCX31OuyWfeX4iQeogVpVLxASA0uutwEmXyJRyEhlv4',
+                  badges: ['VAG GRUBU', '900+ CEVAP'],
+                  slug: 'expert-ayse-b'
                 }
               ].map((expert) => (
-                <div
+                <Link
                   key={expert.name}
-                  className="premium-card flex items-center gap-4 p-5 cursor-pointer group"
+                  href={`/profil/${expert.slug}`}
+                  className="bg-primary-container text-on-primary p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-black transition-all"
                 >
-                  <div className="relative shrink-0">
+                  <div className="relative flex-shrink-0">
                     <img
                       alt={expert.name}
-                      className="w-14 h-14 rounded-xl object-cover border-2"
-                      style={{ borderColor: 'var(--accent)' }}
-                      src={expert.src}
+                      src={expert.avatar}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-secondary-container"
                     />
-                    <div
-                      className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2"
-                      style={{ background: 'var(--success)', borderColor: 'var(--card)' }}
-                    >
-                      <span
-                        className="material-symbols-outlined text-[13px] text-white"
-                        style={{ fontVariationSettings: "'FILL' 1" }}
-                      >
-                        verified
-                      </span>
+                    <div className="absolute -bottom-1 -right-1 bg-secondary-container text-on-secondary-container p-0.5 rounded-full">
+                      <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{expert.name}</h4>
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>{expert.role}</p>
-                    <div className="flex gap-1.5 mt-2 flex-wrap">
-                      {expert.tags.map((tag) => (
-                        <span key={tag} className="accent-badge">{tag}</span>
+                  <div>
+                    <h4 className="font-label-md text-label-md text-on-primary">{expert.name}</h4>
+                    <p className="font-caption text-caption opacity-70 mt-0.5">{expert.title}</p>
+                    <div className="flex gap-2 mt-2">
+                      {expert.badges.map((badge) => (
+                        <span key={badge} className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold text-on-primary">
+                          {badge}
+                        </span>
                       ))}
                     </div>
                   </div>
-                  <span
-                    className="material-symbols-outlined text-[20px] opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1"
-                    style={{ color: 'var(--accent)' }}
-                  >
-                    arrow_forward
-                  </span>
-                </div>
+                </Link>
               ))}
             </div>
           </section>

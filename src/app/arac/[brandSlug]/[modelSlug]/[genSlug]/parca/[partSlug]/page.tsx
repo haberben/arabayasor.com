@@ -1,18 +1,18 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, use } from 'react'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { Sparkles, AlertCircle, Wrench, ShieldAlert, ArrowRight, Star, ChevronRight, HelpCircle, ThumbsUp, ThumbsDown, UserCheck } from 'lucide-react'
 import Link from 'next/link'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     brandSlug: string
     modelSlug: string
     genSlug: string
     partSlug: string
-  }
+  }>
 }
 
 const getMockPartAnalysis = (partSlug: string, genSlug: string) => {
@@ -67,7 +67,7 @@ const getMockPartAnalysis = (partSlug: string, genSlug: string) => {
 }
 
 export default function PartDetailPage({ params }: PageProps) {
-  const { brandSlug, modelSlug, genSlug, partSlug } = params
+  const { brandSlug, modelSlug, genSlug, partSlug } = use(params)
   const partInfo = getMockPartAnalysis(partSlug, genSlug)
 
   const brandName = brandSlug.toUpperCase()

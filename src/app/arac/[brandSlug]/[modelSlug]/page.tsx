@@ -10,14 +10,15 @@ import { ChevronRight, ShieldAlert, BookOpen, Star, Sparkles, Activity } from 'l
 import type { Metadata, ResolvingMetadata } from 'next'
 
 interface Props {
-  params: { brandSlug: string; modelSlug: string }
+  params: Promise<{ brandSlug: string; modelSlug: string }>
 }
 
 export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { brandSlug, modelSlug } = params
+  const resolvedParams = await params
+  const { brandSlug, modelSlug } = resolvedParams
   let titleName = `${brandSlug.toUpperCase()} ${modelSlug.toUpperCase()}`
 
   try {
@@ -108,7 +109,8 @@ async function getModelPageData(brandSlug: string, modelSlug: string) {
 }
 
 export default async function ModelPage({ params }: Props) {
-  const data = await getModelPageData(params.brandSlug, params.modelSlug)
+  const resolvedParams = await params
+  const data = await getModelPageData(resolvedParams.brandSlug, resolvedParams.modelSlug)
 
   if (!data) {
     notFound()

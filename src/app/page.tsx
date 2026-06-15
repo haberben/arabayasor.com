@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { createClient } from '@/lib/supabase-server'
-import { mockBrands, mockReviews, mockProblemReports } from '@/lib/mock-data'
+import { mockBrands, mockReviews, mockProblemReports, mockModels, mockGenerations } from '@/lib/mock-data'
 import { Brand } from '@/types/database'
 
 async function getHomepageData() {
@@ -264,9 +264,12 @@ export default async function HomePage() {
                 const avgRating = Math.round(
                   ((review.rating_engine || 4) + (review.rating_gearbox || 4) + (review.rating_comfort || 4)) / 3
                 )
-                const genName = review.generations?.name || review.generation_id || 'F30'
-                const modelName = review.generations?.models?.name || '3 Serisi'
-                const brandName = review.generations?.models?.brands?.name || 'BMW'
+                const genObj = review.generations || mockGenerations.find((g: any) => g.id === review.generation_id)
+                const genName = genObj?.name || 'F30'
+                const modelObj = genObj?.models || (genObj ? mockModels.find((m: any) => m.id === genObj.model_id) : null)
+                const modelName = modelObj?.name || '3 Serisi'
+                const brandObj = modelObj?.brands || (modelObj ? mockBrands.find((b: any) => b.id === modelObj.brand_id) : null)
+                const brandName = brandObj?.name || 'BMW'
                 const year = review.created_at ? new Date(review.created_at).getFullYear() : 2024
                 const username = review.profiles?.username || 'anonim'
                 const initials = (review.profiles?.full_name || 'A').split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -287,7 +290,7 @@ export default async function HomePage() {
                     </div>
 
                     <h3 className="font-title-md text-title-md mb-2 text-on-surface" style={{ fontSize: '18px' }}>
-                      {brandName} {genName} - {year} Deneyimi
+                      {brandName} {modelName} {genName} - {year} Deneyimi
                     </h3>
                     <p className="font-body-md text-body-md text-on-surface-variant mb-4 text-sm line-clamp-3">
                       {review.content}

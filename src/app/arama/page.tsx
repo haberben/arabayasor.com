@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import { mockBrands, mockModels, mockGenerations, mockReviews } from '@/lib/mock-data'
-import { SlidersHorizontal, RotateCcw, Search } from 'lucide-react'
+import { RotateCcw, Search } from 'lucide-react'
 
 // Map specific slugs to high-res, verified visual images matching the premium templates
 function getCarImage(slug: string) {
@@ -21,18 +21,21 @@ function getCarImage(slug: string) {
     return 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOxvyURXpkCNeD6fD25EmPtuHHXkB9scpyFkXxUr5ZgYAoWQfuu-jljbfcMRZbEOA9ezM3NlwN-zy-WO9g_S1uL_oLRwwNR2R-6t8qjLba72BxzIPXGzXVPVuLEl8I5ayZNLd40Aq2bXKtJ5e6CuXnZfd31nSilBN0FeS2h0zb-lttGB_ytbtroJSawCPnI9R9kiqR6qo_928x_eh2spoNVYvo6axkNb2103bt1GYrzYu6mjW6q0AAT6jcH5w1rhuvMwauoUT8X7g'
   }
   if (s === 'w204') {
-    return 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=600'
+    return '/cars/w204.png'
   }
   if (s === 'b8') {
-    return 'https://images.unsplash.com/photo-1606016159991-dfe4f2746ad5?auto=format&fit=crop&q=80&w=600'
+    return '/cars/b8.png'
   }
   if (s === 'megane-4') {
-    return 'https://images.unsplash.com/photo-1619682855562-b7e61bc8d8ca?auto=format&fit=crop&q=80&w=600'
+    return '/cars/megane-4.png'
   }
   if (s === 'clio-4') {
-    return 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=600'
+    return '/cars/clio-4.png'
   }
-  return 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=600'
+  if (s === 'e160') {
+    return '/cars/e160.png'
+  }
+  return '/cars/f30.png'
 }
 
 const getCardTags = (genSlug: string) => {
@@ -66,8 +69,10 @@ const getCardTags = (genSlug: string) => {
   ]
 }
 
-export default function SearchPage() {
+function SearchContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [selectedBrand, setSelectedBrand] = useState('')
   const [selectedModel, setSelectedModel] = useState('')
   const [selectedFuel, setSelectedFuel] = useState('')
@@ -75,6 +80,43 @@ export default function SearchPage() {
   const [maxYear, setMaxYear] = useState('')
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Sync state with URL search parameters
+  useEffect(() => {
+    const q = searchParams.get('q') || ''
+    setSearchQuery(q)
+
+    const brand = searchParams.get('brand') || ''
+    setSelectedBrand(brand)
+
+    const model = searchParams.get('model') || ''
+    setSelectedModel(model)
+
+    const fuel = searchParams.get('fuel') || ''
+    setSelectedFuel(fuel)
+  }, [searchParams])
+
+  const handleApplyFilters = () => {
+    const params = new URLSearchParams()
+    if (searchQuery) params.set('q', searchQuery)
+    if (selectedBrand) params.set('brand', selectedBrand)
+    if (selectedModel) params.set('model', selectedModel)
+    if (selectedFuel) params.set('fuel', selectedFuel)
+    if (minYear) params.set('minYear', minYear)
+    if (maxYear) params.set('maxYear', maxYear)
+    router.push(`/arama?${params.toString()}`)
+  }
+
+  const handleResetFilters = () => {
+    setSelectedBrand('')
+    setSelectedModel('')
+    setSelectedFuel('')
+    setMinYear('')
+    setMaxYear('')
+    setSearchQuery('')
+    setSelectedCompareIds([])
+    router.push('/arama')
+  }
 
   // Filter Generations logic
   const filteredGenerations = mockGenerations.filter(gen => {
@@ -95,7 +137,7 @@ export default function SearchPage() {
     if (maxYear && endYear > parseInt(maxYear)) return false
 
     if (searchQuery) {
-      const brandName = modelObj?.brands?.name || ''
+      const brandName = mockBrands.find(b => b.id === modelObj?.brand_id)?.name || ''
       const modelName = modelObj?.name || ''
       const fullTitle = `${brandName} ${modelName} ${gen.name}`.toLowerCase()
       if (!fullTitle.includes(searchQuery.toLowerCase())) return false
@@ -103,16 +145,6 @@ export default function SearchPage() {
 
     return true
   })
-
-  const handleResetFilters = () => {
-    setSelectedBrand('')
-    setSelectedModel('')
-    setSelectedFuel('')
-    setMinYear('')
-    setMaxYear('')
-    setSearchQuery('')
-    setSelectedCompareIds([])
-  }
 
   const handleCompareCheckboxChange = (id: string, checked: boolean) => {
     if (checked) {
@@ -142,7 +174,15 @@ export default function SearchPage() {
               <span>/</span>
               <span className="text-primary font-semibold">Arama</span>
             </nav>
-            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">BMW 3 Serisi Sonuçları</h1>
+            <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+              {selectedModel 
+                ? `${mockBrands.find(b => b.id === selectedBrand)?.name || ''} ${mockModels.find(m => m.id === selectedModel)?.name || ''} Sonuçları`
+                : selectedBrand 
+                  ? `${mockBrands.find(b => b.id === selectedBrand)?.name || ''} Modelleri`
+                  : searchQuery 
+                    ? `"${searchQuery}" Sonuçları`
+                    : 'Arama Sonuçları'}
+            </h1>
             <p className="text-on-surface-variant text-body-md">Toplam {filteredGenerations.length} kasa nesli listeleniyor</p>
           </div>
           <div className="flex items-center gap-4">
@@ -255,7 +295,7 @@ export default function SearchPage() {
               </div>
             </div>
 
-            <button onClick={handleResetFilters} className="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-xs mt-4 hover:opacity-90 transition-all active:scale-[0.98]">
+            <button onClick={handleApplyFilters} className="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-xs mt-4 hover:opacity-90 transition-all active:scale-[0.98]">
               Filtreleri Uygula
             </button>
           </aside>
@@ -264,8 +304,9 @@ export default function SearchPage() {
           <section className="flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredGenerations.map((gen) => {
-                const brand = mockModels.find(m => m.id === gen.model_id)?.brands?.name || 'BMW'
-                const model = mockModels.find(m => m.id === gen.model_id)?.name || '3 Serisi'
+                const modelObj = mockModels.find(m => m.id === gen.model_id)
+                const brand = mockBrands.find(b => b.id === modelObj?.brand_id)?.name || 'BMW'
+                const model = modelObj?.name || '3 Serisi'
                 const tags = getCardTags(gen.slug)
                 const isSelected = selectedCompareIds.includes(gen.id)
 
@@ -369,5 +410,17 @@ export default function SearchPage() {
         </button>
       </div>
     </>
+  )
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-container"></div>
+      </div>
+    }>
+      <SearchContent />
+    </Suspense>
   )
 }

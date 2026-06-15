@@ -8,10 +8,11 @@ import { getSparePartsByGen } from '@/lib/parts-data'
 import { 
   Brand, Model, Generation, Review, ProblemReport, Comment, Profile 
 } from '@/types/database'
+import Link from 'next/link'
 import { 
   Star, ShieldAlert, Award, MessageSquare, AlertCircle, Wrench, 
   ThumbsUp, ThumbsDown, Pin, Activity, CheckCircle2, PlusCircle, HelpCircle,
-  ChevronRight, SlidersHorizontal
+  ChevronRight, SlidersHorizontal, TrendingUp
 } from 'lucide-react'
 
 const getAverageReviewRating = (r: any) => {
@@ -744,6 +745,24 @@ export default function GenerationDetailClient({
                 ))}
               </div>
             </div>
+
+            {/* Piyasa Analizi Kısa Kartı */}
+            <div className="glass-card p-6 shadow-md bg-gradient-to-br from-white to-blue-50/20 border border-border">
+              <h3 className="text-sm font-black uppercase tracking-wider text-foreground/80 mb-3 flex items-center gap-1.5">
+                <TrendingUp className="h-4.5 w-4.5 text-accent" />
+                Piyasa Değer Analizi
+              </h3>
+              <p className="text-xs text-muted leading-relaxed mb-4">
+                Bu kasanın Türkiye otomobil pazarındaki ortalama değerini, 12 aylık fiyat değişim trendini ve yapay zeka destekli fiyat tahminlerini inceleyin.
+              </p>
+              <Link 
+                href={`/piyasa-analizi/${generation.slug}`}
+                className="w-full bg-primary-container text-white py-3 rounded-2xl font-bold text-xs hover:opacity-90 active:scale-95 transition-all text-center block"
+              >
+                Fiyat Analiz Raporunu Gör
+              </Link>
+            </div>
+
           </div>
         </div>
       )}

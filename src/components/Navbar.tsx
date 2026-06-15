@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { useTheme } from '@/context/ThemeContext'
 import { createClient } from '@/lib/supabase-client'
-import { 
-  Search, Sun, Moon, LogIn, User as UserIcon, LogOut, Menu, X, 
-  Settings, ShieldAlert, BookOpen, Sparkles, MessageSquare, AlertCircle,
-  SlidersHorizontal
+import {
+  Search, Sun, Moon, LogIn, User as UserIcon, LogOut, Menu, X,
+  Settings, Sparkles, AlertCircle, SlidersHorizontal, ChevronDown,
+  Car, Shield
 } from 'lucide-react'
 
 interface SearchResult {
@@ -29,6 +29,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [searchFocused, setSearchFocused] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
 
   // Auth Modal States
@@ -48,11 +49,21 @@ export default function Navbar() {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Scroll state
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   // Click outside handlers
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSearchResults(false)
+        setSearchFocused(false)
       }
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setProfileDropdownOpen(false)
@@ -62,7 +73,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Fuzzy Search Logic
+  // Search Logic
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setSearchResults([])
@@ -72,82 +83,47 @@ export default function Navbar() {
     const performSearch = async () => {
       try {
         const query = searchQuery.toLowerCase()
-        
-        // Markaları çek ve ara
-        const { data: brands } = await supabase
-          .from('brands')
-          .select('name, slug')
-          
-        // Modelleri çek ve ara
-        const { data: models } = await supabase
-          .from('models')
-          .select('name, slug, brands(name, slug)')
-
-        // Kasaları çek ve ara
-        const { data: generations } = await supabase
-          .from('generations')
-          .select('name, slug, years, models(name, slug, brands(name, slug))')
+        const { data: brands } = await supabase.from('brands').select('name, slug')
+        const { data: models } = await supabase.from('models').select('name, slug, brands(name, slug)')
+        const { data: generations } = await supabase.from('generations').select('name, slug, years, models(name, slug, brands(name, slug))')
 
         const results: SearchResult[] = []
 
-        // Marka filtreleme
-        if (brands) {
-          brands.forEach(b => {
-            if (b.name.toLowerCase().includes(query)) {
-              results.push({
-                type: 'brand',
-                title: b.name,
-                url: `/arac/${b.slug}`
-              })
-            }
-          })
-        }
+        brands?.forEach(b => {
+          if (b.name.toLowerCase().includes(query)) {
+            results.push({ type: 'brand', title: b.name, url: `/arac/${b.slug}` })
+          }
+        })
 
-        // Model filtreleme
-        if (models) {
-          models.forEach((m: any) => {
-            if (m.name.toLowerCase().includes(query) || (m.brands?.name && m.brands.name.toLowerCase().includes(query))) {
-              results.push({
-                type: 'model',
-                title: `${m.brands?.name} ${m.name}`,
-                url: `/arac/${m.brands?.slug}/${m.slug}`
-              })
-            }
-          })
-        }
+        models?.forEach((m: any) => {
+          if (m.name.toLowerCase().includes(query) || m.brands?.name?.toLowerCase().includes(query)) {
+            results.push({ type: 'model', title: `${m.brands?.name} ${m.name}`, url: `/arac/${m.brands?.slug}/${m.slug}` })
+          }
+        })
 
-        // Kasa filtreleme
-        if (generations) {
-          generations.forEach((g: any) => {
-            const brandName = g.models?.brands?.name || ''
-            const modelName = g.models?.name || ''
-            const fullTitle = `${brandName} ${modelName} ${g.name}`
-            if (
-              g.name.toLowerCase().includes(query) || 
-              fullTitle.toLowerCase().includes(query)
-            ) {
-              results.push({
-                type: 'generation',
-                title: fullTitle,
-                subtitle: `${g.years} | Kasa`,
-                url: `/arac/${g.models?.brands?.slug}/${g.models?.slug}/${g.slug}`
-              })
-            }
-          })
-        }
+        generations?.forEach((g: any) => {
+          const brandName = g.models?.brands?.name || ''
+          const modelName = g.models?.name || ''
+          const fullTitle = `${brandName} ${modelName} ${g.name}`
+          if (g.name.toLowerCase().includes(query) || fullTitle.toLowerCase().includes(query)) {
+            results.push({
+              type: 'generation',
+              title: fullTitle,
+              subtitle: `${g.years} · Kasa`,
+              url: `/arac/${g.models?.brands?.slug}/${g.models?.slug}/${g.slug}`
+            })
+          }
+        })
 
-        setSearchResults(results.slice(0, 7)) // En fazla 7 sonuç göster
+        setSearchResults(results.slice(0, 7))
         setShowSearchResults(true)
       } catch (err) {
         console.error('Search error:', err)
       }
     }
 
-    const delayDebounceFn = setTimeout(() => {
-      performSearch()
-    }, 300)
-
-    return () => clearTimeout(delayDebounceFn)
+    const delay = setTimeout(performSearch, 300)
+    return () => clearTimeout(delay)
   }, [searchQuery])
 
   // Auth Operations
@@ -158,83 +134,132 @@ export default function Navbar() {
 
     try {
       if (isSignUp) {
-        if (!username || !fullName) {
-          throw new Error('Lütfen tüm alanları doldurun.')
-        }
-        if (username.length < 3) {
-          throw new Error('Kullanıcı adı en az 3 karakter olmalıdır.')
-        }
+        if (!username || !fullName) throw new Error('Lütfen tüm alanları doldurun.')
+        if (username.length < 3) throw new Error('Kullanıcı adı en az 3 karakter olmalıdır.')
 
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: {
-            data: {
-              username: username.trim().toLowerCase(),
-              full_name: fullName.trim()
-            }
-          }
+          options: { data: { username: username.trim().toLowerCase(), full_name: fullName.trim() } }
         })
 
         if (error) throw error
-        
-        // E-posta doğrulama kontrolü
         if (data.session) {
           setShowAuthModal(false)
           router.refresh()
         } else {
-          setAuthError('Kayıt başarılı! Lütfen e-postanızı kontrol edip doğrulayın.')
+          setAuthError('Kayıt başarılı! Lütfen e-postanızı doğrulayın.')
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        })
-
+        const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
         setShowAuthModal(false)
         router.refresh()
       }
+    } catch (err: any) {
+      setAuthError(err.message || 'Bir hata oluştu.')
     } finally {
       setAuthLoading(false)
     }
   }
 
+  const typeLabel = (type: string) => {
+    if (type === 'brand') return 'Marka'
+    if (type === 'model') return 'Model'
+    return 'Kasa'
+  }
+
+  const typeIcon = (type: string) => {
+    if (type === 'brand') return <Shield className="h-3 w-3" />
+    if (type === 'model') return <Car className="h-3 w-3" />
+    return <Car className="h-3 w-3" />
+  }
+
   return (
     <>
-      <header className="bg-surface-container-lowest dark:bg-primary-container docked w-full top-0 sticky z-50 border-b border-border-low dark:border-outline-variant shadow-sm dark:shadow-none">
-        <div className="flex justify-between items-center px-margin-desktop w-full max-w-max-width mx-auto h-16">
-          <div className="flex items-center gap-8">
-            <Link className="text-title-md font-display-lg font-black tracking-tight text-on-surface dark:text-on-primary" href="/">
-              arabayasor.com
+      {/* ===================== NAVBAR ===================== */}
+      <header
+        className={`glass-header sticky top-0 z-50 w-full transition-all duration-300 ${
+          scrolled ? 'shadow-lg shadow-black/5' : ''
+        }`}
+      >
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4 md:px-8">
+
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 shrink-0 group"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground font-black text-sm transition-transform group-hover:scale-105">
+              A
+            </div>
+            <span
+              className="hidden sm:block font-black text-[15px] tracking-tight"
+              style={{ color: 'var(--foreground)' }}
+            >
+              arabayasor<span style={{ color: 'var(--accent)' }}>.com</span>
+            </span>
+          </Link>
+
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-1 ml-2">
+            <Link
+              href="/ai-analiz"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:bg-[var(--accent-subtle)] hover:text-[var(--accent)]"
+              style={{ color: 'var(--muted)' }}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              AI Analizi
             </Link>
-            <nav className="hidden md:flex gap-6">
-              <Link className="text-primary dark:text-secondary-fixed font-bold border-b-2 border-secondary-container font-label-md text-label-md py-1" href="/ai-analiz">
-                AI Analizi
-              </Link>
-              <Link className="text-on-surface-variant dark:text-outline-variant font-medium hover:text-secondary dark:hover:text-secondary-fixed-dim transition-colors duration-200 font-label-md text-label-md py-1" href="/arama">
-                Topluluk
-              </Link>
-            </nav>
-          </div>
+            <Link
+              href="/arama"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-all hover:bg-[var(--accent-subtle)] hover:text-[var(--accent)]"
+              style={{ color: 'var(--muted)' }}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Topluluk
+            </Link>
+          </nav>
 
           {/* Search Box - Desktop */}
-          <div ref={searchRef} className="relative hidden max-w-md flex-1 px-8 md:block">
-            <div className="relative">
-              <Search className="absolute top-2.5 left-3 h-4 w-4 text-outline" />
+          <div ref={searchRef} className="relative hidden md:flex flex-1 max-w-sm mx-4">
+            <div
+              className={`flex w-full items-center gap-2 rounded-xl border px-3 py-2 transition-all duration-200 ${
+                searchFocused
+                  ? 'border-[var(--accent)] shadow-[0_0_0_3px_rgba(254,166,25,0.12)]'
+                  : 'border-[var(--border)] hover:border-[var(--border-hover)]'
+              }`}
+              style={{ background: 'var(--surface)' }}
+            >
+              <Search className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
               <input
                 type="text"
-                placeholder="Marka, model veya kasa ara... (Örn: E90)"
+                placeholder="Marka, model veya kasa ara…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => searchQuery.trim().length >= 2 && setShowSearchResults(true)}
-                className="w-full rounded-full border border-border-low bg-surface-container-low py-2 pr-4 pl-10 text-sm outline-none focus:ring-2 focus:ring-secondary-container/30 transition-all text-on-surface"
+                onFocus={() => {
+                  setSearchFocused(true)
+                  if (searchQuery.trim().length >= 2) setShowSearchResults(true)
+                }}
+                className="w-full bg-transparent text-sm outline-none"
+                style={{ color: 'var(--foreground)' }}
               />
+              {searchQuery && (
+                <button
+                  onClick={() => { setSearchQuery(''); setSearchResults([]) }}
+                  className="shrink-0 rounded p-0.5 transition-colors hover:bg-[var(--border)]"
+                >
+                  <X className="h-3.5 w-3.5" style={{ color: 'var(--muted-foreground)' }} />
+                </button>
+              )}
             </div>
 
-            {/* Search Results Dropdown */}
+            {/* Search Dropdown */}
             {showSearchResults && searchResults.length > 0 && (
-              <div className="absolute left-8 right-8 mt-2 max-h-96 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-2xl custom-scrollbar z-50">
+              <div
+                className="animate-scale-in absolute left-0 right-0 top-full mt-2 max-h-80 overflow-y-auto rounded-2xl border p-1.5 shadow-2xl custom-scrollbar z-50"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+              >
                 {searchResults.map((res, i) => (
                   <button
                     key={i}
@@ -243,82 +268,116 @@ export default function Navbar() {
                       setSearchQuery('')
                       router.push(res.url)
                     }}
-                    className="flex w-full flex-col rounded-xl px-4 py-2.5 text-left hover:bg-background transition-colors text-on-surface"
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[var(--surface)]"
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{res.title}</span>
-                      <span className="rounded bg-accent/10 px-2 py-0.5 text-xs font-medium text-accent">
-                        {res.type === 'brand' ? 'Marka' : res.type === 'model' ? 'Model' : 'Kasa'}
-                      </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{res.title}</span>
+                      {res.subtitle && (
+                        <span className="text-xs mt-0.5" style={{ color: 'var(--muted-foreground)' }}>{res.subtitle}</span>
+                      )}
                     </div>
-                    {res.subtitle && (
-                      <span className="text-xs text-muted mt-0.5">{res.subtitle}</span>
-                    )}
+                    <span className="accent-badge ml-2 shrink-0 flex items-center gap-1">
+                      {typeIcon(res.type)}
+                      {typeLabel(res.type)}
+                    </span>
                   </button>
                 ))}
               </div>
             )}
             {showSearchResults && searchQuery.trim().length >= 2 && searchResults.length === 0 && (
-              <div className="absolute left-8 right-8 mt-2 rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted shadow-2xl z-50">
-                Sonuç bulunamadı. Başka bir kelime deneyin.
+              <div
+                className="animate-scale-in absolute left-0 right-0 top-full mt-2 rounded-2xl border p-5 text-center text-sm shadow-2xl z-50"
+                style={{ background: 'var(--card)', borderColor: 'var(--border)', color: 'var(--muted)' }}
+              >
+                Sonuç bulunamadı
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center border border-border-low rounded-lg p-1 mr-2">
-              <button className="px-2 py-0.5 text-[12px] font-bold bg-primary text-on-primary rounded">TR</button>
-              <button className="px-2 py-0.5 text-[12px] font-medium text-on-surface-variant hover:text-primary">EN</button>
-            </div>
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-2 ml-auto">
+            {/* Theme Toggle */}
+            <button
+              id="theme-toggle"
+              onClick={toggleTheme}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border transition-all hover:bg-[var(--surface)] hover:border-[var(--border-hover)] active:scale-95"
+              style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}
+              aria-label="Tema değiştir"
+            >
+              {theme === 'dark'
+                ? <Sun className="h-4 w-4 text-[var(--accent)]" />
+                : <Moon className="h-4 w-4" />
+              }
+            </button>
 
-            {/* User Dropdown / Login Button */}
+            {/* User Section */}
             {user ? (
               <div ref={dropdownRef} className="relative">
                 <button
+                  id="profile-dropdown-btn"
                   onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                  className="flex items-center gap-2 rounded-full border border-border-low bg-surface-container-low py-1.5 pr-4 pl-2 hover:bg-border-low/50 transition-all duration-200"
+                  className="flex items-center gap-2 rounded-xl border px-2.5 py-1.5 transition-all hover:bg-[var(--surface)] hover:border-[var(--border-hover)]"
+                  style={{ borderColor: 'var(--border)' }}
                 >
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm">
+                  <div
+                    className="flex h-7 w-7 items-center justify-center rounded-lg font-bold text-sm"
+                    style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
+                  >
                     {profile?.username ? profile.username[0].toUpperCase() : 'U'}
                   </div>
-                  <div className="flex flex-col items-start text-left">
-                    <span className="text-xs font-bold leading-tight text-on-surface">{profile?.username || 'Kullanıcı'}</span>
-                    <span className="text-[10px] text-on-secondary-container font-semibold leading-none">{profile?.role || 'Yeni Üye'}</span>
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-xs font-bold leading-tight" style={{ color: 'var(--foreground)' }}>
+                      {profile?.username || 'Kullanıcı'}
+                    </span>
+                    <span className="text-[10px] font-medium leading-none" style={{ color: 'var(--muted)' }}>
+                      {profile?.role || 'Üye'}
+                    </span>
                   </div>
+                  <ChevronDown
+                    className={`h-3.5 w-3.5 hidden sm:block transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180' : ''}`}
+                    style={{ color: 'var(--muted-foreground)' }}
+                  />
                 </button>
 
                 {profileDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-card p-2 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-150 z-50">
-                    <div className="px-4 py-2 border-b border-border/50 mb-1">
-                      <p className="text-xs text-muted font-medium">Hoş geldin,</p>
-                      <p className="text-sm font-bold truncate">{profile?.full_name || 'Kullanıcı'}</p>
+                  <div
+                    className="animate-scale-in absolute right-0 mt-2 w-56 rounded-2xl border p-1.5 shadow-2xl z-50"
+                    style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+                  >
+                    {/* User Info Header */}
+                    <div className="px-3 py-3 border-b mb-1" style={{ borderColor: 'var(--border)' }}>
+                      <p className="text-xs font-medium" style={{ color: 'var(--muted)' }}>Hoş geldin,</p>
+                      <p className="text-sm font-bold truncate mt-0.5" style={{ color: 'var(--foreground)' }}>
+                        {profile?.full_name || 'Kullanıcı'}
+                      </p>
                       <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] bg-accent/15 text-accent px-2 py-0.5 rounded-full font-bold">
-                          {profile?.xp} XP
-                        </span>
+                        <span className="accent-badge">{profile?.xp ?? 0} XP</span>
                       </div>
                     </div>
 
                     <Link
                       href={`/profil/${profile?.username}`}
                       onClick={() => setProfileDropdownOpen(false)}
-                      className="flex w-full items-center gap-2 rounded-xl px-4 py-2 text-sm hover:bg-background transition-colors text-on-surface"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface)]"
+                      style={{ color: 'var(--foreground)' }}
                     >
-                      <UserIcon className="h-4 w-4 text-muted" />
+                      <UserIcon className="h-4 w-4" style={{ color: 'var(--muted)' }} />
                       Profilim
                     </Link>
 
-                    {/* Admin checks */}
                     {(profile?.role === 'Master Usta' || profile?.role === 'Efsane Usta') && (
                       <Link
                         href="/admin"
                         onClick={() => setProfileDropdownOpen(false)}
-                        className="flex w-full items-center gap-2 rounded-xl px-4 py-2 text-sm hover:bg-background text-warning transition-colors"
+                        className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--surface)]"
+                        style={{ color: 'var(--warning)' }}
                       >
                         <Settings className="h-4 w-4" />
                         Yönetim Paneli
                       </Link>
                     )}
+
+                    <div className="h-px my-1" style={{ background: 'var(--border)' }} />
 
                     <button
                       onClick={async () => {
@@ -326,7 +385,8 @@ export default function Navbar() {
                         await signOut()
                         router.push('/')
                       }}
-                      className="flex w-full items-center gap-2 rounded-xl px-4 py-2 text-sm text-danger hover:bg-danger/10 transition-colors mt-1"
+                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+                      style={{ color: 'var(--danger)' }}
                     >
                       <LogOut className="h-4 w-4" />
                       Çıkış Yap
@@ -335,262 +395,322 @@ export default function Navbar() {
                 )}
               </div>
             ) : (
-              <>
+              <div className="hidden md:flex items-center gap-2">
                 <button
-                  onClick={() => {
-                    setIsSignUp(false)
-                    setAuthError('')
-                    setShowAuthModal(true)
-                  }}
-                  className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors"
+                  id="login-btn"
+                  onClick={() => { setIsSignUp(false); setAuthError(''); setShowAuthModal(true) }}
+                  className="text-sm font-semibold px-3 py-2 rounded-lg transition-colors hover:bg-[var(--surface)]"
+                  style={{ color: 'var(--muted)' }}
                 >
                   Giriş Yap
                 </button>
                 <button
-                  onClick={() => {
-                    setIsSignUp(true)
-                    setAuthError('')
-                    setShowAuthModal(true)
-                  }}
-                  className="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-opacity-90 transition-all"
+                  id="signup-btn"
+                  onClick={() => { setIsSignUp(true); setAuthError(''); setShowAuthModal(true) }}
+                  className="btn-accent text-sm px-4 py-2 rounded-lg"
                 >
-                  Kayıt Ol
+                  Üye Ol
                 </button>
-              </>
+              </div>
             )}
-          </div>
 
-          {/* Mobile Menu Button */}
-          <div className="flex items-center gap-3 md:hidden">
-            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="rounded-full p-2 hover:bg-border/50 text-foreground">
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {/* Mobile Menu Button */}
+            <button
+              id="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden flex h-9 w-9 items-center justify-center rounded-xl border transition-all hover:bg-[var(--surface)]"
+              style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile Drawer */}
+      {/* ===================== MOBILE DRAWER ===================== */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-md md:hidden animate-in fade-in duration-200">
-          <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-            <span className="text-title-md font-display-lg font-black tracking-tight text-on-surface dark:text-on-primary">
-              arabayasor.com
-            </span>
-            <button onClick={() => setMobileMenuOpen(false)} className="rounded-full p-2 hover:bg-border/50 text-foreground">
-              <X className="h-6 w-6" />
+        <div
+          className="animate-fade-in fixed inset-0 z-50 md:hidden flex flex-col"
+          style={{ background: 'var(--card)' }}
+        >
+          {/* Drawer Header */}
+          <div
+            className="flex h-16 items-center justify-between border-b px-5"
+            style={{ borderColor: 'var(--border)' }}
+          >
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-accent-foreground font-black text-sm">
+                A
+              </div>
+              <span className="font-black text-[15px] tracking-tight" style={{ color: 'var(--foreground)' }}>
+                arabayasor<span style={{ color: 'var(--accent)' }}>.com</span>
+              </span>
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex h-9 w-9 items-center justify-center rounded-xl border"
+              style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+            >
+              <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="flex flex-col p-6 gap-6">
+          {/* Drawer Content */}
+          <div className="flex flex-col gap-3 overflow-y-auto p-5 flex-1">
             {/* Mobile Search */}
-            <div className="relative">
-              <Search className="absolute top-2.5 left-3 h-4.5 w-4.5 text-muted" />
+            <div
+              className="flex items-center gap-2 rounded-xl border px-3 py-2.5"
+              style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+            >
+              <Search className="h-4 w-4 shrink-0" style={{ color: 'var(--muted-foreground)' }} />
               <input
                 type="text"
-                placeholder="Marka, model veya kasa ara..."
+                placeholder="Marka, model veya kasa ara…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-full border border-border bg-card py-2.5 pr-4 pl-10 text-sm outline-none"
+                className="w-full bg-transparent text-sm outline-none"
+                style={{ color: 'var(--foreground)' }}
               />
-              {searchResults.length > 0 && (
-                <div className="absolute left-0 right-0 mt-2 max-h-64 overflow-y-auto rounded-2xl border border-border bg-card p-2 shadow-2xl z-50">
-                  {searchResults.map((res, i) => (
-                    <button
-                      key={i}
-                      onClick={() => {
-                        setMobileMenuOpen(false)
-                        setSearchQuery('')
-                        router.push(res.url)
-                      }}
-                      className="flex w-full items-center justify-between px-4 py-3 rounded-xl hover:bg-background text-left"
+            </div>
+
+            {/* Mobile Search Results */}
+            {searchResults.length > 0 && (
+              <div
+                className="rounded-2xl border p-1.5 max-h-48 overflow-y-auto custom-scrollbar"
+                style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+              >
+                {searchResults.map((res, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setMobileMenuOpen(false); setSearchQuery(''); router.push(res.url) }}
+                    className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-[var(--card)]"
+                  >
+                    <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{res.title}</span>
+                    <span className="accent-badge">{typeLabel(res.type)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Mobile Nav Links */}
+            <div className="flex flex-col gap-1 mt-2">
+              <Link
+                href="/ai-analiz"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
+                style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}
+              >
+                <Sparkles className="h-4.5 w-4.5" />
+                AI İlan Analizi
+              </Link>
+              <Link
+                href="/arama"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors hover:bg-[var(--surface)]"
+                style={{ color: 'var(--foreground)' }}
+              >
+                <SlidersHorizontal className="h-4.5 w-4.5" style={{ color: 'var(--muted)' }} />
+                Gelişmiş Arama
+              </Link>
+            </div>
+
+            {/* Mobile Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors hover:bg-[var(--surface)] border mt-1"
+              style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+            >
+              {theme === 'dark'
+                ? <><Sun className="h-4 w-4 text-[var(--accent)]" /><span>Açık Tema</span></>
+                : <><Moon className="h-4 w-4" style={{ color: 'var(--muted)' }} /><span>Koyu Tema</span></>
+              }
+            </button>
+
+            {/* Mobile Auth */}
+            <div className="mt-auto pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
+              {user ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3 px-2 py-3">
+                    <div
+                      className="flex h-10 w-10 items-center justify-center rounded-xl font-bold"
+                      style={{ background: 'var(--accent)', color: 'var(--accent-foreground)' }}
                     >
-                      <span className="text-sm font-semibold">{res.title}</span>
-                      <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded font-bold">{res.type}</span>
-                    </button>
-                  ))}
+                      {profile?.username ? profile.username[0].toUpperCase() : 'U'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{profile?.username}</p>
+                      <p className="text-xs" style={{ color: 'var(--muted)' }}>{profile?.role} · {profile?.xp} XP</p>
+                    </div>
+                  </div>
+                  <Link
+                    href={`/profil/${profile?.username}`}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors hover:bg-[var(--surface)]"
+                    style={{ color: 'var(--foreground)' }}
+                  >
+                    <UserIcon className="h-4 w-4" style={{ color: 'var(--muted)' }} />
+                    Profilim
+                  </Link>
+                  <button
+                    onClick={async () => { setMobileMenuOpen(false); await signOut(); router.push('/') }}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors"
+                    style={{ color: 'var(--danger)' }}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Çıkış Yap
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); setIsSignUp(false); setAuthError(''); setShowAuthModal(true) }}
+                    className="flex-1 rounded-xl border py-3 text-sm font-bold transition-colors hover:bg-[var(--surface)]"
+                    style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                  >
+                    Giriş Yap
+                  </button>
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); setIsSignUp(true); setAuthError(''); setShowAuthModal(true) }}
+                    className="btn-accent flex-1 rounded-xl py-3 text-sm"
+                  >
+                    Üye Ol
+                  </button>
                 </div>
               )}
             </div>
-
-            <Link
-              href="/arama"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 py-3 px-4 rounded-2xl bg-accent/10 text-accent font-bold text-sm mb-2"
-            >
-              <SlidersHorizontal className="h-5 w-5" />
-              Gelişmiş Arama
-            </Link>
-
-            <Link
-              href="/ai-analiz"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-3 py-3 px-4 rounded-2xl bg-warning/10 text-warning font-bold text-sm"
-            >
-              <Sparkles className="h-5 w-5" />
-              AI İlan Analizi
-            </Link>
-
-            {/* Mobile Auth actions */}
-            {user ? (
-              <div className="flex flex-col gap-3 border-t border-border/50 pt-4">
-                <div className="px-4">
-                  <p className="text-xs text-muted">Giriş Yapıldı:</p>
-                  <p className="text-base font-bold">{profile?.username}</p>
-                  <p className="text-xs text-accent font-bold mt-0.5">{profile?.role} | {profile?.xp} XP</p>
-                </div>
-
-                <Link
-                  href={`/profil/${profile?.username}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-card text-sm font-bold"
-                >
-                  <UserIcon className="h-5 w-5 text-muted" />
-                  Profilim
-                </Link>
-
-                {(profile?.role === 'Master Usta' || profile?.role === 'Efsane Usta') && (
-                  <Link
-                    href="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-card text-sm font-bold text-warning"
-                  >
-                    <Settings className="h-5 w-5" />
-                    Yönetim Paneli
-                  </Link>
-                )}
-
-                <button
-                  onClick={async () => {
-                    setMobileMenuOpen(false)
-                    await signOut()
-                    router.push('/')
-                  }}
-                  className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-danger/10 text-danger text-sm font-bold text-left"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Çıkış Yap
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false)
-                  setIsSignUp(false)
-                  setAuthError('')
-                  setShowAuthModal(true)
-                }}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-accent py-3 font-bold text-accent-foreground"
-              >
-                <LogIn className="h-5 w-5" />
-                Giriş Yap / Üye Ol
-              </button>
-            )}
           </div>
         </div>
       )}
 
-      {/* Authentication Modal */}
+      {/* ===================== AUTH MODAL ===================== */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl relative animate-in zoom-in-95 duration-200">
-            
+        <div
+          className="animate-fade-in fixed inset-0 z-[60] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAuthModal(false) }}
+        >
+          <div
+            className="animate-scale-in relative w-full max-w-md rounded-3xl border p-7 shadow-2xl"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            {/* Close Button */}
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 rounded-full p-1.5 hover:bg-border/50 text-muted hover:text-foreground"
+              className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-xl transition-colors hover:bg-[var(--surface)]"
+              style={{ color: 'var(--muted)' }}
             >
-              <X className="h-5 w-5" />
+              <X className="h-4.5 w-4.5" />
             </button>
 
-            <h2 className="text-2xl font-black tracking-tight mb-1 text-center">
-              {isSignUp ? 'Aramıza Katıl' : 'Giriş Yap'}
+            {/* Logo in Modal */}
+            <div className="flex justify-center mb-5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-accent-foreground font-black text-xl">
+                A
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-black tracking-tight text-center mb-1" style={{ color: 'var(--foreground)' }}>
+              {isSignUp ? 'Aramıza Katıl' : 'Tekrar Hoş Geldin'}
             </h2>
-            <p className="text-xs text-muted text-center mb-6">
-              {isSignUp ? 'Fikirlerini paylaşmak ve oylamak için üye ol.' : 'arabayasor.com topluluğuna hoş geldin.'}
+            <p className="text-sm text-center mb-6" style={{ color: 'var(--muted)' }}>
+              {isSignUp
+                ? 'Fikirlerini paylaşmak ve oylamak için üye ol.'
+                : 'arabayasor.com topluluğuna giriş yap.'}
             </p>
 
             {authError && (
-              <div className="flex items-start gap-2 rounded-xl bg-danger/10 p-3 text-xs text-danger mb-4">
+              <div
+                className="flex items-start gap-2.5 rounded-xl p-3 text-sm mb-4"
+                style={{
+                  background: authError.includes('başarılı') ? 'rgba(0,182,122,0.1)' : 'rgba(220,38,38,0.08)',
+                  color: authError.includes('başarılı') ? 'var(--success)' : 'var(--danger)',
+                  border: `1px solid ${authError.includes('başarılı') ? 'rgba(0,182,122,0.2)' : 'rgba(220,38,38,0.2)'}`
+                }}
+              >
                 <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{authError}</span>
               </div>
             )}
 
-            <form onSubmit={handleAuth} className="flex flex-col gap-4">
+            <form onSubmit={handleAuth} className="flex flex-col gap-3">
               {isSignUp && (
                 <>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-foreground/80">Kullanıcı Adı</label>
+                  <div>
+                    <label className="text-xs font-bold mb-1.5 block" style={{ color: 'var(--foreground)' }}>
+                      Kullanıcı Adı
+                    </label>
                     <input
                       type="text"
-                      placeholder="Orn: ahmet_usta"
+                      placeholder="Örn: ahmet_usta"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
-                      className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent"
+                      className="themed-input"
                     />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <label className="text-xs font-bold text-foreground/80">Ad Soyad</label>
+                  <div>
+                    <label className="text-xs font-bold mb-1.5 block" style={{ color: 'var(--foreground)' }}>
+                      Ad Soyad
+                    </label>
                     <input
                       type="text"
-                      placeholder="Orn: Ahmet Yılmaz"
+                      placeholder="Örn: Ahmet Yılmaz"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent"
+                      className="themed-input"
                     />
                   </div>
                 </>
               )}
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-foreground/80">E-posta</label>
+              <div>
+                <label className="text-xs font-bold mb-1.5 block" style={{ color: 'var(--foreground)' }}>
+                  E-posta
+                </label>
                 <input
                   type="email"
-                  placeholder="Orn: eposta@adresiniz.com"
+                  placeholder="eposta@adresiniz.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent"
+                  className="themed-input"
                 />
               </div>
 
-              <div className="flex flex-col gap-1">
-                <label className="text-xs font-bold text-foreground/80">Şifre</label>
+              <div>
+                <label className="text-xs font-bold mb-1.5 block" style={{ color: 'var(--foreground)' }}>
+                  Şifre
+                </label>
                 <input
                   type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:border-accent"
+                  className="themed-input"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={authLoading}
-                className="w-full bg-accent text-accent-foreground py-3 rounded-full font-bold hover:bg-accent-hover transition-colors mt-2 disabled:opacity-50"
+                className="btn-accent w-full py-3 rounded-xl mt-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {authLoading ? 'İşlem yapılıyor...' : isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
+                {authLoading ? 'İşlem yapılıyor…' : isSignUp ? 'Hesap Oluştur' : 'Giriş Yap'}
               </button>
             </form>
 
-            <div className="text-center mt-6 text-xs">
-              <span className="text-muted">
-                {isSignUp ? 'Zaten üye misiniz?' : 'Hesabınız yok mu?'}
-              </span>{' '}
+            <p className="text-center text-sm mt-5" style={{ color: 'var(--muted)' }}>
+              {isSignUp ? 'Zaten üye misiniz?' : 'Hesabınız yok mu?'}{' '}
               <button
-                onClick={() => {
-                  setIsSignUp(!isSignUp)
-                  setAuthError('')
-                }}
-                className="text-accent font-bold hover:underline"
+                onClick={() => { setIsSignUp(!isSignUp); setAuthError('') }}
+                className="font-bold hover:underline"
+                style={{ color: 'var(--accent)' }}
               >
                 {isSignUp ? 'Giriş Yap' : 'Üye Ol'}
               </button>
-            </div>
-
+            </p>
           </div>
         </div>
       )}

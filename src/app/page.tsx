@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabase-server'
 import { mockBrands, mockReviews, mockProblemReports } from '@/lib/mock-data'
 import { Brand } from '@/types/database'
 
-// Verileri çek veya mock kullan
 async function getHomepageData() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -50,194 +49,372 @@ async function getHomepageData() {
   }
 }
 
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <div className="flex gap-0.5">
+      {[...Array(5)].map((_, i) => (
+        <span
+          key={i}
+          className="material-symbols-outlined text-[18px]"
+          style={{
+            color: i < rating ? 'var(--success)' : 'var(--border-hover)',
+            fontVariationSettings: i < rating ? "'FILL' 1" : "'FILL' 0"
+          }}
+        >
+          star
+        </span>
+      ))}
+    </div>
+  )
+}
+
+const STAT_ITEMS = [
+  { value: '12.400+', label: 'Kayıtlı Araç' },
+  { value: '84.000+', label: 'Kullanıcı Yorumu' },
+  { value: '3.200+', label: 'Kronik Sorun' },
+  { value: '4.8★', label: 'Ortalama Puan' },
+]
+
+const FILTER_LINKS = [
+  { icon: 'calendar_today', label: 'Model Yılı' },
+  { icon: 'ev_station', label: 'Yakıt Tipi' },
+  { icon: 'settings_input_component', label: 'Şanzıman' },
+  { icon: 'enable', label: 'Motor Hacmi' },
+  { icon: 'settings_input_antenna', label: 'Çekiş Tipi' },
+]
+
 export default async function HomePage() {
   const { brands, reviews, recentProblems } = await getHomepageData()
-
-  // Trustpilot tarzı yeşil yıldızlar
-  const renderStars = (rating: number) => {
-    return (
-      <div className="flex gap-1 text-trust-green">
-        {[...Array(5)].map((_, i) => (
-          <span 
-            key={i} 
-            className="material-symbols-outlined" 
-            style={{ fontVariationSettings: i < rating ? "'FILL' 1" : "'FILL' 0" }}
-          >
-            star
-          </span>
-        ))}
-      </div>
-    )
-  }
 
   return (
     <>
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative bg-primary-container text-on-primary py-24 overflow-hidden">
-        <div className="max-w-max-width mx-auto px-margin-desktop relative z-10 text-center">
-          <h1 className="font-display-lg text-display-lg mb-8 leading-tight">Aracını Sor, Gerçeği Öğren</h1>
-          <p className="font-body-lg text-body-lg text-surface-variant mb-12 max-w-2xl mx-auto">
-            Binlerce kullanıcı deneyimi ve teknik raporlarla otomobil dünyasının şeffaf yüzü. İlan linkini yapıştır, yapay zeka analiz etsin.
+      {/* ================================================
+          HERO SECTION
+          ================================================ */}
+      <section className="hero-bg relative py-24 md:py-32">
+        <div className="relative z-10 mx-auto max-w-[1400px] px-4 md:px-8 text-center">
+
+          {/* Eyebrow Badge */}
+          <div className="animate-fade-in-up inline-flex items-center gap-2 rounded-full border px-4 py-1.5 mb-8"
+            style={{ background: 'rgba(254,166,25,0.12)', borderColor: 'rgba(254,166,25,0.3)', color: '#fea619' }}
+          >
+            <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+            <span className="text-xs font-bold tracking-wider uppercase">Türkiye'nin #1 Otomobil Platformu</span>
+          </div>
+
+          {/* Hero Headline */}
+          <h1
+            className="animate-fade-in-up animate-delay-100 font-black tracking-tight mb-6 mx-auto max-w-3xl leading-[1.1]"
+            style={{ fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', color: '#ffffff' }}
+          >
+            Aracını Sor,{' '}
+            <span style={{ color: 'var(--accent)' }}>Gerçeği</span>{' '}
+            Öğren
+          </h1>
+
+          {/* Hero Subtitle */}
+          <p
+            className="animate-fade-in-up animate-delay-200 text-base md:text-lg mb-10 mx-auto max-w-xl leading-relaxed"
+            style={{ color: 'rgba(200, 215, 235, 0.8)' }}
+          >
+            Binlerce kullanıcı deneyimi ve teknik raporlarla otomobil dünyasının şeffaf yüzü.
+            İlan linkini yapıştır, yapay zeka analiz etsin.
           </p>
-          <HomeSearch />
+
+          {/* Search Box */}
+          <div className="animate-fade-in-up animate-delay-300">
+            <HomeSearch />
+          </div>
+
+          {/* Stats Row */}
+          <div className="animate-fade-in-up animate-delay-300 flex flex-wrap justify-center gap-6 md:gap-10 mt-12">
+            {STAT_ITEMS.map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-2xl font-black" style={{ color: 'var(--accent)' }}>{stat.value}</div>
+                <div className="text-xs font-medium mt-0.5" style={{ color: 'rgba(180,200,225,0.7)' }}>{stat.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <main className="max-width mx-auto px-margin-desktop py-12 flex gap-gutter max-w-max-width">
-        {/* SideNavBar (Filter Drawer) */}
-        <aside className="bg-surface-container-low dark:bg-primary-container h-screen w-[300px] sticky top-20 hidden lg:block border-r border-border-low dark:border-outline-variant flex flex-col p-gutter space-y-4 rounded-xl overflow-y-auto">
-          <div className="mb-6">
-            <h3 className="font-title-md text-title-md text-on-surface dark:text-on-primary">Detaylı Filtreler</h3>
-            <p className="font-label-md text-label-md text-on-surface-variant opacity-70">Araç sonuçlarını daraltın</p>
+      {/* ================================================
+          MAIN CONTENT
+          ================================================ */}
+      <main
+        className="mx-auto max-w-[1400px] px-4 md:px-8 py-12 flex gap-8"
+        style={{ alignItems: 'flex-start' }}
+      >
+
+        {/* ── SIDEBAR ── */}
+        <aside
+          className="hidden lg:flex flex-col w-[260px] shrink-0 sticky top-20 rounded-2xl border overflow-hidden"
+          style={{ background: 'var(--card)', borderColor: 'var(--border)', maxHeight: 'calc(100vh - 100px)' }}
+        >
+          {/* Sidebar Header */}
+          <div className="px-5 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+            <h3 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>Detaylı Filtreler</h3>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>Araç sonuçlarını daraltın</p>
           </div>
-          <nav className="space-y-1">
-            <Link className="bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-lg font-bold flex items-center gap-3 p-3 transition-transform translate-x-1" href="/arama">
-              <span className="material-symbols-outlined">calendar_today</span>
-              <span className="font-label-md text-label-md">Model Yılı</span>
-            </Link>
-            <Link className="text-on-surface-variant dark:text-outline-variant hover:bg-surface-variant dark:hover:bg-on-primary-fixed-variant flex items-center gap-3 p-3 rounded-lg transition-all" href="/arama">
-              <span className="material-symbols-outlined">ev_station</span>
-              <span className="font-label-md text-label-md">Yakıt Tipi</span>
-            </Link>
-            <Link className="text-on-surface-variant dark:text-outline-variant hover:bg-surface-variant dark:hover:bg-on-primary-fixed-variant flex items-center gap-3 p-3 rounded-lg transition-all" href="/arama">
-              <span className="material-symbols-outlined">settings_input_component</span>
-              <span className="font-label-md text-label-md">Şanzıman</span>
-            </Link>
-            <Link className="text-on-surface-variant dark:text-outline-variant hover:bg-surface-variant dark:hover:bg-on-primary-fixed-variant flex items-center gap-3 p-3 rounded-lg transition-all" href="/arama">
-              <span className="material-symbols-outlined">enable</span>
-              <span className="font-label-md text-label-md">Motor Hacmi</span>
-            </Link>
-            <Link className="text-on-surface-variant dark:text-outline-variant hover:bg-surface-variant dark:hover:bg-on-primary-fixed-variant flex items-center gap-3 p-3 rounded-lg transition-all" href="/arama">
-              <span className="material-symbols-outlined">settings_input_antenna</span>
-              <span className="font-label-md text-label-md">Çekiş Tipi</span>
-            </Link>
+
+          {/* Sidebar Links */}
+          <nav className="p-3 flex flex-col gap-0.5 flex-1 overflow-y-auto custom-scrollbar">
+            {FILTER_LINKS.map((item, i) => (
+              <Link
+                key={item.label}
+                href="/arama"
+                className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                  i === 0 ? 'font-bold' : 'hover:bg-[var(--surface)]'
+                }`}
+                style={{
+                  background: i === 0 ? 'var(--accent-subtle)' : undefined,
+                  color: i === 0 ? 'var(--accent)' : 'var(--muted)',
+                }}
+              >
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={{ color: i === 0 ? 'var(--accent)' : 'var(--muted-foreground)' }}
+                >
+                  {item.icon}
+                </span>
+                {item.label}
+              </Link>
+            ))}
           </nav>
-          <Link href="/arama" className="mt-8 bg-primary text-on-primary w-full py-4 rounded-xl font-label-md text-label-md hover:opacity-90 transition-all block text-center">
-            Filtreleri Uygula
-          </Link>
+
+          {/* Apply Button */}
+          <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
+            <Link
+              href="/arama"
+              className="btn-primary block w-full text-center py-3 rounded-xl text-sm"
+            >
+              Filtreleri Uygula
+            </Link>
+          </div>
         </aside>
 
-        {/* Main Content Area */}
-        <div className="flex-1 space-y-12 min-w-0">
-          {/* AI Link Analysis */}
-          <section className="bg-white border border-border-low rounded-xl p-8 shadow-sm">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 bg-secondary-container/20 rounded-full flex items-center justify-center text-secondary-container">
-                <span className="material-symbols-outlined">auto_awesome</span>
+        {/* ── MAIN FEED ── */}
+        <div className="flex-1 min-w-0 flex flex-col gap-10">
+
+          {/* AI İlan Analizi */}
+          <section
+            className="rounded-2xl border p-6 md:p-8 relative overflow-hidden"
+            style={{ background: 'var(--card)', borderColor: 'var(--border)' }}
+          >
+            {/* Decorative glow */}
+            <div
+              className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(254,166,25,0.06) 0%, transparent 70%)',
+                transform: 'translate(30%, -30%)'
+              }}
+            />
+            <div className="relative z-10">
+              <div className="flex items-start gap-4 mb-6">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                  style={{ background: 'var(--accent-subtle)', border: '1px solid rgba(254,166,25,0.25)' }}
+                >
+                  <span
+                    className="material-symbols-outlined text-[22px]"
+                    style={{ color: 'var(--accent)', fontVariationSettings: "'FILL' 1" }}
+                  >
+                    auto_awesome
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>AI İlan Analizi</h2>
+                  <p className="text-sm mt-0.5" style={{ color: 'var(--muted)' }}>
+                    İlan linkini girin, AI teknik durumu ve piyasayı özetlesin.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="font-title-md text-title-md">AI İlan Analizi</h2>
-                <p className="font-body-md text-body-md text-on-surface-variant">İlan linkini girin, AI teknik durumu ve piyasayı özetlesin.</p>
-              </div>
+              <form action="/ai-analiz" method="GET" className="flex gap-3">
+                <input
+                  name="url"
+                  className="themed-input flex-1"
+                  placeholder="https://www.sahibinden.com/ilan/..."
+                  type="text"
+                />
+                <button
+                  type="submit"
+                  className="btn-accent shrink-0 px-6 py-2.5 rounded-xl text-sm font-bold"
+                >
+                  Analiz Et
+                </button>
+              </form>
             </div>
-            <form action="/ai-analiz" method="GET" className="flex gap-4">
-              <input 
-                name="url" 
-                className="flex-1 bg-surface-container-low border border-border-low rounded-lg px-4 py-3 outline-none focus:border-primary transition-all font-body-md text-body-md" 
-                placeholder="https://www.sahibinden.com/ilan/..." 
-                type="text"
-              />
-              <button type="submit" className="bg-primary text-on-primary px-8 rounded-lg font-label-md text-label-md hover:bg-opacity-95 active:scale-95 transition-all">Analiz Et</button>
-            </form>
           </section>
 
-          {/* Popular Brands */}
+          {/* Popüler Markalar */}
           <section>
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="font-title-md text-title-md">Popüler Markalar</h2>
-              <Link className="text-secondary font-label-md text-label-md hover:underline" href="/arama">Tümünü Gör</Link>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="section-title">Popüler Markalar</h2>
+              <Link
+                href="/arama"
+                className="text-sm font-semibold transition-colors hover:opacity-80"
+                style={{ color: 'var(--accent)' }}
+              >
+                Tümünü Gör →
+              </Link>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
               {brands.map((brand) => {
                 const localLogo = `/logos/${brand.slug.toLowerCase()}.svg`
                 return (
                   <Link
                     key={brand.id}
                     href={`/arac/${brand.slug}`}
-                    className="bg-white border border-border-low p-6 rounded-xl text-center hover:shadow-md transition-all group cursor-pointer"
+                    className="premium-card flex flex-col items-center justify-center gap-3 p-4 cursor-pointer"
                   >
-                    <img 
-                      alt={brand.name} 
-                      className="w-12 h-12 mx-auto mb-4 grayscale group-hover:grayscale-0 transition-all object-contain" 
+                    <img
+                      alt={brand.name}
+                      className="w-10 h-10 object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
                       src={brand.logo_url || localLogo}
                     />
-                    <span className="font-label-md text-label-md text-on-surface">{brand.name}</span>
+                    <span
+                      className="text-xs font-semibold text-center truncate w-full"
+                      style={{ color: 'var(--foreground)' }}
+                    >
+                      {brand.name}
+                    </span>
                   </Link>
                 )
               })}
             </div>
           </section>
 
-          {/* Warning Highlight Component */}
+          {/* Kronik Sorun Alarmı */}
           {recentProblems.length > 0 && (
-            <section className="bg-orange-50 border-l-4 border-secondary p-6 rounded-r-xl">
-              <div className="flex gap-4">
-                <span className="material-symbols-outlined text-secondary text-[24px]">report_problem</span>
-                <div>
-                  <h4 className="font-label-md text-label-md text-secondary">Kronik Sorun Alarmı: {recentProblems[0].generations?.models?.brands?.name || 'BMW'} {recentProblems[0].title}</h4>
-                  <p className="font-caption text-caption text-on-surface-variant mt-1">{recentProblems[0].description}</p>
+            <section
+              className="rounded-2xl border-l-4 p-5 flex items-start gap-4"
+              style={{
+                background: 'rgba(254,166,25,0.05)',
+                borderLeftColor: 'var(--accent)',
+                border: '1px solid rgba(254,166,25,0.15)',
+                borderLeft: '4px solid var(--accent)'
+              }}
+            >
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: 'rgba(254,166,25,0.12)' }}
+              >
+                <span
+                  className="material-symbols-outlined text-[20px]"
+                  style={{ color: 'var(--accent)', fontVariationSettings: "'FILL' 1" }}
+                >
+                  report_problem
+                </span>
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--accent)' }}>
+                    Kronik Sorun Alarmı
+                  </span>
                 </div>
+                <h4 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>
+                  {recentProblems[0].generations?.models?.brands?.name || 'BMW'} — {recentProblems[0].title}
+                </h4>
+                <p className="text-xs mt-1 leading-relaxed" style={{ color: 'var(--muted)' }}>
+                  {recentProblems[0].description}
+                </p>
               </div>
             </section>
           )}
 
-          {/* Community Reviews */}
+          {/* Son Kullanıcı Değerlendirmeleri */}
           <section>
-            <div className="flex justify-between items-end mb-6">
-              <h2 className="font-title-md text-title-md">Son Kullanıcı Değerlendirmeleri</h2>
-              <Link href="/arama" className="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-lg font-label-md text-label-md flex items-center gap-2 hover:bg-opacity-95 transition-all">
-                <span className="material-symbols-outlined text-[18px]">add</span> Deneyimini Paylaş
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="section-title">Son Kullanıcı Değerlendirmeleri</h2>
+              <Link
+                href="/arama"
+                className="flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-sm font-semibold transition-all hover:bg-[var(--surface)]"
+                style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+              >
+                <span className="material-symbols-outlined text-[16px]" style={{ color: 'var(--accent)' }}>add</span>
+                Deneyimini Paylaş
               </Link>
             </div>
-            <div className="space-y-4">
+
+            <div className="flex flex-col gap-4">
               {reviews.map((rev: any) => {
-                const total = 
-                  rev.rating_engine + 
-                  rev.rating_gearbox + 
-                  rev.rating_electric + 
-                  rev.rating_fuel + 
-                  rev.rating_comfort + 
-                  rev.rating_parts + 
-                  rev.rating_mechanic
+                const total =
+                  (rev.rating_engine || 0) +
+                  (rev.rating_gearbox || 0) +
+                  (rev.rating_electric || 0) +
+                  (rev.rating_fuel || 0) +
+                  (rev.rating_comfort || 0) +
+                  (rev.rating_parts || 0) +
+                  (rev.rating_mechanic || 0)
                 const avgRating = (total / 7).toFixed(1)
-                
+
                 const genName = rev.generations?.name || 'F30'
                 const modelName = rev.generations?.models?.name || '3 Serisi'
                 const brandName = rev.generations?.models?.brands?.name || 'BMW'
 
                 return (
-                  <article key={rev.id} className="bg-white border border-border-low p-6 rounded-xl hover:border-secondary transition-all duration-200 hover:-translate-y-1 hover:shadow-md">
-                    <div className="flex justify-between mb-4">
-                      <div className="flex items-center gap-1 text-trust-green">
-                        {renderStars(Math.round(parseFloat(avgRating)))}
-                        <span className="ml-2 text-on-surface font-label-md text-label-md">{avgRating} / 5</span>
+                  <article
+                    key={rev.id}
+                    className="premium-card p-5 md:p-6"
+                  >
+                    {/* Review Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex flex-col gap-1">
+                        <StarRating rating={Math.round(parseFloat(avgRating))} />
+                        <span className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>
+                          {avgRating} / 5
+                        </span>
                       </div>
-                      <span className="font-caption text-caption text-on-surface-variant">
+                      <span className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
                         {new Date(rev.created_at || '2026-06-12').toLocaleDateString('tr-TR')}
                       </span>
                     </div>
-                    <h3 className="font-title-md text-title-md mb-2">{brandName} {modelName} {genName} Deneyimi</h3>
-                    <p className="font-body-md text-body-md text-on-surface-variant mb-4">
+
+                    {/* Title */}
+                    <h3 className="text-base font-bold mb-2" style={{ color: 'var(--foreground)' }}>
+                      {brandName} {modelName} {genName} Deneyimi
+                    </h3>
+
+                    {/* Content */}
+                    <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--muted)' }}>
                       {rev.content}
                     </p>
-                    <div className="flex justify-between items-center pt-4 border-t border-border-low">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary">
+
+                    {/* Footer */}
+                    <div
+                      className="flex items-center justify-between pt-4 border-t"
+                      style={{ borderColor: 'var(--border)' }}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <div
+                          className="flex h-8 w-8 items-center justify-center rounded-lg font-bold text-sm"
+                          style={{ background: 'var(--surface)', color: 'var(--foreground)' }}
+                        >
                           {(rev.profiles?.username || 'U')[0].toUpperCase()}
                         </div>
-                        <span className="font-label-md text-label-md">@{rev.profiles?.username || 'user'}</span>
-                        <span className="bg-trust-green/10 text-trust-green px-2 py-0.5 rounded text-[10px] font-bold uppercase">Doğrulanmış Sahibi</span>
+                        <div>
+                          <span className="text-sm font-semibold block" style={{ color: 'var(--foreground)' }}>
+                            @{rev.profiles?.username || 'user'}
+                          </span>
+                        </div>
+                        <span className="trust-badge">Doğrulanmış</span>
                       </div>
-                      <div className="flex gap-4">
-                        <button className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-all">
-                          <span className="material-symbols-outlined text-[18px]">thumb_up</span>
-                          <span className="text-[12px]">24</span>
+                      <div className="flex items-center gap-3">
+                        <button
+                          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-[var(--accent)]"
+                          style={{ color: 'var(--muted)' }}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">thumb_up</span>
+                          24
                         </button>
-                        <button className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-all">
-                          <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
-                          <span className="text-[12px]">3</span>
+                        <button
+                          className="flex items-center gap-1 text-xs font-medium transition-colors hover:text-[var(--accent)]"
+                          style={{ color: 'var(--muted)' }}
+                        >
+                          <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+                          3
                         </button>
                       </div>
                     </div>
@@ -247,45 +424,67 @@ export default async function HomePage() {
             </div>
           </section>
 
-          {/* Top Experts */}
-          <section className="pb-12">
-            <h2 className="font-title-md text-title-md mb-6">Topluluk Uzmanları</h2>
+          {/* Topluluk Uzmanları */}
+          <section className="pb-4">
+            <h2 className="section-title mb-5">Topluluk Uzmanları</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-primary-container text-on-primary p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-black transition-all">
-                <div className="relative">
-                  <img alt="Usta" className="w-16 h-16 rounded-full object-cover border-2 border-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEZoNKuZEIDAyWkGovLRyAIzKQbu2mUsHlgnV46eC56vrBAc2Cbzp1KNj8a4UZznfh0dSusv45DySdaStB7Mn7et5vEOoKBHsZiGCpy-oI8BcUvt4ivPlx3YUoc1S6Ag9HCg6URJp4OE-QDt8CeOX_z-0QEsRpucwo9kO6FUkYt4lVwXwwttDe3q6ph7ZgaDmY6fTuTA_nKgLERlQ5bmpmwXeKVYMb-PptBJ6a6aTQIeztRsWOkWenaoupHBLEv8yHbIDvYpiLsbw"/>
-                  <div className="absolute -bottom-1 -right-1 bg-secondary-container text-on-secondary-container p-0.5 rounded-full">
-                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              {[
+                {
+                  name: 'Usta Selim Y.',
+                  role: '25+ Yıl Motor Mekanik Uzmanı',
+                  tags: ['BMW Uzmanı', '1.2B Cevap'],
+                  src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCEZoNKuZEIDAyWkGovLRyAIzKQbu2mUsHlgnV46eC56vrBAc2Cbzp1KNj8a4UZznfh0dSusv45DySdaStB7Mn7et5vEOoKBHsZiGCpy-oI8BcUvt4ivPlx3YUoc1S6Ag9HCg6URJp4OE-QDt8CeOX_z-0QEsRpucwo9kO6FUkYt4lVwXwwttDe3q6ph7ZgaDmY6fTuTA_nKgLERlQ5bmpmwXeKVYMb-PptBJ6a6aTQIeztRsWOkWenaoupHBLEv8yHbIDvYpiLsbw'
+                },
+                {
+                  name: 'Expert Ayşe B.',
+                  role: 'Ekspertiz ve Piyasa Analisti',
+                  tags: ['VAG Grubu', '900+ Cevap'],
+                  src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA94PpYFl9s16bPekLsOvSEfrm9MkWFyjleDFTPNZ0lh2IaZHuSIONptjRqvHZXytD1vbm0MxTm7fA4PYsfl_6MQ1YxCWN6jwqAON9PZ1Q-w6gOzDlycMyEpnyr6kETclL7xi0L3xwx4bAlmVw4vh01k8XKa8zYZohSobLojj1iAPlrG4wgaGJa5XzxVd_N-G4C5gvUbO1RPkEVvXJ_0ig8SCuyIe2u8tfXCX31OuyWfeX4iQeogVpVLxASA0uutwEmXyJRyEhlv4'
+                }
+              ].map((expert) => (
+                <div
+                  key={expert.name}
+                  className="premium-card flex items-center gap-4 p-5 cursor-pointer group"
+                >
+                  <div className="relative shrink-0">
+                    <img
+                      alt={expert.name}
+                      className="w-14 h-14 rounded-xl object-cover border-2"
+                      style={{ borderColor: 'var(--accent)' }}
+                      src={expert.src}
+                    />
+                    <div
+                      className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2"
+                      style={{ background: 'var(--success)', borderColor: 'var(--card)' }}
+                    >
+                      <span
+                        className="material-symbols-outlined text-[13px] text-white"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        verified
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <h4 className="font-label-md text-label-md">Usta Selim Y.</h4>
-                  <p className="font-caption text-caption opacity-70">25+ Yıl Motor Mekanik Uzmanı</p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold">BMW UZMANI</span>
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold">1.2B CEVAP</span>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold" style={{ color: 'var(--foreground)' }}>{expert.name}</h4>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>{expert.role}</p>
+                    <div className="flex gap-1.5 mt-2 flex-wrap">
+                      {expert.tags.map((tag) => (
+                        <span key={tag} className="accent-badge">{tag}</span>
+                      ))}
+                    </div>
                   </div>
+                  <span
+                    className="material-symbols-outlined text-[20px] opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1"
+                    style={{ color: 'var(--accent)' }}
+                  >
+                    arrow_forward
+                  </span>
                 </div>
-              </div>
-              
-              <div className="bg-primary-container text-on-primary p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-black transition-all">
-                <div className="relative">
-                  <img alt="Expert" className="w-16 h-16 rounded-full object-cover border-2 border-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA94PpYFl9s16bPekLsOvSEfrm9MkWFyjleDFTPNZ0lh2IaZHuSIONptjRqvHZXytD1vbm0MxTm7fA4PYsfl_6MQ1YxCWN6jwqAON9PZ1Q-w6gOzDlycMyEpnyr6kETclL7xi0L3xwx4bAlmVw4vh01k8XKa8zYZohSobLojj1iAPlrG4wgaGJa5XzxVd_N-G4C5gvUbO1RPkEVvXJ_0ig8SCuyIe2u8tfXCX31OuyWfeX4iQeogVpVLxASA0uutwEmXyJRyEhlv4"/>
-                  <div className="absolute -bottom-1 -right-1 bg-secondary-container text-on-secondary-container p-0.5 rounded-full">
-                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-label-md text-label-md">Expert Ayşe B.</h4>
-                  <p className="font-caption text-caption opacity-70">Ekspertiz ve Piyasa Analisti</p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold">VAG GRUBU</span>
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold">900+ CEVAP</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
           </section>
+
         </div>
       </main>
 
@@ -293,4 +492,3 @@ export default async function HomePage() {
     </>
   )
 }
-

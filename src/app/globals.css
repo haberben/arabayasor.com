@@ -1,7 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
-
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
 
 /* =====================================================
    TAILWIND THEME - Orijinal MD3 Token Sistemi
@@ -73,6 +72,11 @@
 
   /* Trust & Special */
   --color-trust-green: #00B67A;
+
+  /* Muted & Accent fallbacks */
+  --color-muted: #76777d;
+  --color-muted-foreground: #64748b;
+  --color-accent: #fea619;
 
   /* Spacing */
   --spacing-max-width: 1280px;

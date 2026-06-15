@@ -78,6 +78,9 @@ function SearchContent() {
   const [selectedFuel, setSelectedFuel] = useState('')
   const [minYear, setMinYear] = useState('')
   const [maxYear, setMaxYear] = useState('')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [selectedBodyType, setSelectedBodyType] = useState('')
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
 
@@ -94,6 +97,15 @@ function SearchContent() {
 
     const fuel = searchParams.get('fuel') || ''
     setSelectedFuel(fuel)
+
+    const minP = searchParams.get('minPrice') || ''
+    setMinPrice(minP)
+
+    const maxP = searchParams.get('maxPrice') || ''
+    setMaxPrice(maxP)
+
+    const bodyT = searchParams.get('bodyType') || ''
+    setSelectedBodyType(bodyT)
   }, [searchParams])
 
   const handleApplyFilters = () => {
@@ -104,6 +116,9 @@ function SearchContent() {
     if (selectedFuel) params.set('fuel', selectedFuel)
     if (minYear) params.set('minYear', minYear)
     if (maxYear) params.set('maxYear', maxYear)
+    if (minPrice) params.set('minPrice', minPrice)
+    if (maxPrice) params.set('maxPrice', maxPrice)
+    if (selectedBodyType) params.set('bodyType', selectedBodyType)
     router.push(`/arama?${params.toString()}`)
   }
 
@@ -113,6 +128,9 @@ function SearchContent() {
     setSelectedFuel('')
     setMinYear('')
     setMaxYear('')
+    setMinPrice('')
+    setMaxPrice('')
+    setSelectedBodyType('')
     setSearchQuery('')
     setSelectedCompareIds([])
     router.push('/arama')
@@ -135,6 +153,15 @@ function SearchContent() {
 
     if (minYear && startYear < parseInt(minYear)) return false
     if (maxYear && endYear > parseInt(maxYear)) return false
+
+    // Budget range check (overlap test)
+    const genMin = gen.min_price || 0
+    const genMax = gen.max_price || 99999999
+    if (minPrice && genMax < parseInt(minPrice)) return false
+    if (maxPrice && genMin > parseInt(maxPrice)) return false
+
+    // Body type check
+    if (selectedBodyType && gen.body_type !== selectedBodyType) return false
 
     if (searchQuery) {
       const brandName = mockBrands.find(b => b.id === modelObj?.brand_id)?.name || ''
@@ -276,6 +303,43 @@ function SearchContent() {
                 </div>
               </div>
 
+              {/* Price range */}
+              <div>
+                <label className="font-label-md text-primary mb-1 block text-xs">Bütçe Aralığı (TL)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    placeholder="Min TL" 
+                    value={minPrice} 
+                    onChange={(e) => setMinPrice(e.target.value)}
+                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+                  />
+                  <input 
+                    type="number" 
+                    placeholder="Max TL" 
+                    value={maxPrice} 
+                    onChange={(e) => setMaxPrice(e.target.value)}
+                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+              </div>
+
+              {/* Kasa Tipi */}
+              <div>
+                <label className="font-label-md text-primary mb-1 block text-xs">Kasa Tipi</label>
+                <select 
+                  value={selectedBodyType} 
+                  onChange={(e) => setSelectedBodyType(e.target.value)}
+                  className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">Tümü</option>
+                  <option value="Sedan">Sedan</option>
+                  <option value="Hatchback">Hatchback</option>
+                  <option value="SUV">SUV</option>
+                  <option value="Coupe">Coupe</option>
+                </select>
+              </div>
+
               {/* Fuel Type */}
               <div>
                 <label className="font-label-md text-primary mb-2 block text-xs">Yakıt Tipi</label>
@@ -337,7 +401,12 @@ function SearchContent() {
                           <span className="text-caption text-on-surface-variant">Karşılaştır</span>
                         </label>
                       </div>
-                      <p className="text-caption text-on-surface-variant mb-4">Üretim Yılları: {gen.years}</p>
+                      <p className="text-caption text-on-surface-variant mb-1">Üretim Yılları: {gen.years}</p>
+                      {gen.min_price && gen.max_price && (
+                        <p className="text-caption font-bold text-secondary-container mb-4">
+                          Ortalama Piyasa: {(gen.min_price / 1000).toLocaleString('tr-TR')}k - {(gen.max_price / 1000).toLocaleString('tr-TR')}k TL
+                        </p>
+                      )}
                       
                       <div className="space-y-3 mb-6">
                         <div className="flex flex-wrap gap-2">

@@ -40,6 +40,9 @@ export interface Generation {
   engines: EngineOption[]
   buying_guide: string
   image_url?: string
+  body_type?: 'Sedan' | 'Hatchback' | 'SUV' | 'Coupe'
+  min_price?: number
+  max_price?: number
   created_at: string
   models?: Model
 }

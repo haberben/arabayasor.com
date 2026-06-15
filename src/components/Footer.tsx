@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-primary-container full-width bottom-0">
       {/* Main Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 px-8 py-12 max-w-[1280px] mx-auto">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-8 px-4 sm:px-8 py-12 max-w-[1280px] mx-auto">
         {/* Brand */}
         <div>
           <h3 className="text-on-primary mb-4 font-black tracking-tight" style={{ fontSize: '18px', lineHeight: '28px' }}>
@@ -85,7 +85,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/10 py-6 text-center max-w-[1280px] mx-auto px-8">
+      <div className="border-t border-white/10 py-6 text-center max-w-[1280px] mx-auto px-4 sm:px-8">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-2">
           <p className="font-label-md text-label-md text-on-primary-container opacity-70 text-xs">
             © 2024 arabayasor.com - Teknik Güvenilirlik Topluluğu

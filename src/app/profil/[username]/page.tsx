@@ -399,7 +399,7 @@ export default function ProfilePage({ params }: PageProps) {
 
       {/* 1. VIP Business Banner */}
       {profileData.is_vip && (
-        <div className="w-full h-64 md:h-80 bg-slate-955 overflow-hidden relative border-b border-border-low">
+        <div className="w-full h-64 md:h-80 bg-slate-950 overflow-hidden relative border-b border-border-low">
           <img 
             src={profileData.banner_url || 'https://images.unsplash.com/photo-1617886903355-9354bb57751f?q=80&w=1200&auto=format&fit=crop'} 
             alt="Business Banner" 
@@ -409,7 +409,7 @@ export default function ProfilePage({ params }: PageProps) {
             }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[1280px] px-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[1280px] px-4 md:px-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
             <div>
               <span className="bg-secondary-container text-on-secondary-container font-black text-[10px] uppercase tracking-wider px-3 py-1 rounded-full shadow-sm inline-flex items-center gap-1.5 mb-2">
                 <Sparkles className="h-3.5 w-3.5 fill-current" /> VIP Kurumsal Mağaza

@@ -39,7 +39,7 @@ export default function Navbar() {
       <header
         className={`bg-surface-container-lowest sticky top-0 z-50 border-b border-border-low transition-shadow duration-200 ${scrolled ? 'shadow-sm' : ''}`}
       >
-        <div className="flex items-center justify-between px-8 w-full max-w-[1280px] mx-auto h-16 gap-6">
+        <div className="flex items-center justify-between px-4 md:px-8 w-full max-w-[1280px] mx-auto h-16 gap-6">
           {/* Logo */}
           <div className="flex items-center gap-8 flex-shrink-0">
             <Link

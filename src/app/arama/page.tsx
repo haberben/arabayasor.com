@@ -83,6 +83,7 @@ function SearchContent() {
   const [selectedBodyType, setSelectedBodyType] = useState('')
   const [selectedCompareIds, setSelectedCompareIds] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
 
   // Sync state with URL search parameters
   useEffect(() => {
@@ -188,11 +189,139 @@ function SearchContent() {
     return (total / genReviews.length).toFixed(1)
   }
 
+  const renderFilterFields = () => {
+    return (
+      <div className="space-y-4 mt-2">
+        {/* Kelime ile Ara */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Kelime ile Ara</label>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-outline" />
+            <input
+              type="text"
+              placeholder="Örn: F30"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 pl-9 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+            />
+          </div>
+        </div>
+
+        {/* Marka */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Marka</label>
+          <select 
+            value={selectedBrand} 
+            onChange={(e) => { setSelectedBrand(e.target.value); setSelectedModel(''); }}
+            className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+          >
+            <option value="">Tümü</option>
+            {mockBrands.map(b => (
+              <option key={b.id} value={b.id}>{b.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Model */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Model</label>
+          <select 
+            value={selectedModel} 
+            onChange={(e) => setSelectedModel(e.target.value)}
+            className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface disabled:opacity-55"
+            disabled={!selectedBrand}
+          >
+            <option value="">Tümü</option>
+            {mockModels.filter(m => m.brand_id === selectedBrand).map(m => (
+              <option key={m.id} value={m.id}>{m.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Yıl Aralığı */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Yıl Aralığı</label>
+          <div className="flex gap-2">
+            <input 
+              type="number" 
+              placeholder="Min" 
+              value={minYear} 
+              onChange={(e) => setMinYear(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+            />
+            <input 
+              type="number" 
+              placeholder="Max" 
+              value={maxYear} 
+              onChange={(e) => setMaxYear(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+            />
+          </div>
+        </div>
+
+        {/* Bütçe Aralığı */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Bütçe Aralığı (TL)</label>
+          <div className="flex gap-2">
+            <input 
+              type="number" 
+              placeholder="Min TL" 
+              value={minPrice} 
+              onChange={(e) => setMinPrice(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+            />
+            <input 
+              type="number" 
+              placeholder="Max TL" 
+              value={maxPrice} 
+              onChange={(e) => setMaxPrice(e.target.value)}
+              className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+            />
+          </div>
+        </div>
+
+        {/* Kasa Tipi */}
+        <div>
+          <label className="font-label-md text-primary mb-1 block text-xs">Kasa Tipi</label>
+          <select 
+            value={selectedBodyType} 
+            onChange={(e) => setSelectedBodyType(e.target.value)}
+            className="w-full bg-white dark:bg-slate-900 border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary text-on-surface"
+          >
+            <option value="">Tümü</option>
+            <option value="Sedan">Sedan</option>
+            <option value="Hatchback">Hatchback</option>
+            <option value="SUV">SUV</option>
+            <option value="Coupe">Coupe</option>
+          </select>
+        </div>
+
+        {/* Yakıt Tipi */}
+        <div>
+          <label className="font-label-md text-primary mb-2 block text-xs">Yakıt Tipi</label>
+          <div className="space-y-2">
+            {['Benzin', 'Dizel', 'Elektrik'].map(f => (
+              <label key={f} className="flex items-center gap-3 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={selectedFuel.toLowerCase() === f.toLowerCase()}
+                  onChange={(e) => setSelectedFuel(e.target.checked ? f : '')}
+                  className="w-4 h-4 rounded border-border-low text-primary focus:ring-primary text-on-surface" 
+                />
+                <span className="text-xs text-on-surface group-hover:text-primary transition-colors">{f}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <>
       <Navbar />
 
-      <main className="flex-grow w-full max-w-max-width mx-auto px-margin-desktop py-8">
+      <main className="flex-grow w-full max-w-[1280px] mx-auto px-4 md:px-8 py-8">
         {/* Breadcrumbs & Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
@@ -223,6 +352,33 @@ function SearchContent() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Mobile Filter Toggle Button */}
+          <div className="lg:hidden w-full flex gap-2 mb-2">
+            <button
+              onClick={() => setMobileFiltersOpen(true)}
+              className="flex-grow bg-secondary-container text-on-secondary-container py-3 px-4 rounded-xl font-label-md text-xs font-bold shadow-sm active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[18px]">tune</span>
+              Filtrele ({[
+                selectedBrand && 'Marka',
+                selectedModel && 'Model',
+                selectedFuel && 'Yakıt',
+                (minYear || maxYear) && 'Yıl',
+                (minPrice || maxPrice) && 'Fiyat',
+                selectedBodyType && 'Kasa'
+              ].filter(Boolean).length} aktif)
+            </button>
+            {(selectedBrand || selectedModel || selectedFuel || minYear || maxYear || minPrice || maxPrice || selectedBodyType || searchQuery) && (
+              <button
+                onClick={handleResetFilters}
+                className="bg-surface-container-high border border-border-low text-on-surface p-3 rounded-xl hover:bg-surface-gray transition-all flex items-center justify-center"
+                aria-label="Filtreleri Temizle"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
           {/* SideNavBar (Filter Sidebar) */}
           <aside className="hidden lg:flex flex-col p-4 gap-4 bg-surface-container-low dark:bg-primary-container h-fit w-[300px] sticky top-24 border border-border-low rounded-xl">
             <div className="flex justify-between items-center pb-2 border-b border-border-low">
@@ -235,129 +391,7 @@ function SearchContent() {
               </button>
             </div>
 
-            <div className="space-y-4 mt-2">
-              {/* Keyword Search */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Kelime ile Ara</label>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-outline" />
-                  <input
-                    type="text"
-                    placeholder="Örn: F30"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-white border border-border-low rounded p-2 pl-9 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Brand Select */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Marka</label>
-                <select 
-                  value={selectedBrand} 
-                  onChange={(e) => { setSelectedBrand(e.target.value); setSelectedModel(''); }}
-                  className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="">Tümü</option>
-                  {mockBrands.map(b => (
-                    <option key={b.id} value={b.id}>{b.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Model Select */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Model</label>
-                <select 
-                  value={selectedModel} 
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  disabled={!selectedBrand}
-                >
-                  <option value="">Tümü</option>
-                  {mockModels.filter(m => m.brand_id === selectedBrand).map(m => (
-                    <option key={m.id} value={m.id}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Year range */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Yıl Aralığı</label>
-                <div className="flex gap-2">
-                  <input 
-                    type="number" 
-                    placeholder="Min" 
-                    value={minYear} 
-                    onChange={(e) => setMinYear(e.target.value)}
-                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  />
-                  <input 
-                    type="number" 
-                    placeholder="Max" 
-                    value={maxYear} 
-                    onChange={(e) => setMaxYear(e.target.value)}
-                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Price range */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Bütçe Aralığı (TL)</label>
-                <div className="flex gap-2">
-                  <input 
-                    type="number" 
-                    placeholder="Min TL" 
-                    value={minPrice} 
-                    onChange={(e) => setMinPrice(e.target.value)}
-                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  />
-                  <input 
-                    type="number" 
-                    placeholder="Max TL" 
-                    value={maxPrice} 
-                    onChange={(e) => setMaxPrice(e.target.value)}
-                    className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-              </div>
-
-              {/* Kasa Tipi */}
-              <div>
-                <label className="font-label-md text-primary mb-1 block text-xs">Kasa Tipi</label>
-                <select 
-                  value={selectedBodyType} 
-                  onChange={(e) => setSelectedBodyType(e.target.value)}
-                  className="w-full bg-white border border-border-low rounded p-2 text-xs outline-none focus:ring-1 focus:ring-primary"
-                >
-                  <option value="">Tümü</option>
-                  <option value="Sedan">Sedan</option>
-                  <option value="Hatchback">Hatchback</option>
-                  <option value="SUV">SUV</option>
-                  <option value="Coupe">Coupe</option>
-                </select>
-              </div>
-
-              {/* Fuel Type */}
-              <div>
-                <label className="font-label-md text-primary mb-2 block text-xs">Yakıt Tipi</label>
-                <div className="space-y-2">
-                  {['Benzin', 'Dizel', 'Elektrik'].map(f => (
-                    <label key={f} className="flex items-center gap-3 cursor-pointer group">
-                      <input 
-                        type="checkbox" 
-                        checked={selectedFuel.toLowerCase() === f.toLowerCase()}
-                        onChange={(e) => setSelectedFuel(e.target.checked ? f : '')}
-                        className="w-4 h-4 rounded border-border-low text-primary focus:ring-primary" 
-                      />
-                      <span className="text-xs text-on-surface group-hover:text-primary transition-colors">{f}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
+            {renderFilterFields()}
 
             <button onClick={handleApplyFilters} className="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md text-xs mt-4 hover:opacity-90 transition-all active:scale-[0.98]">
               Filtreleri Uygula
@@ -459,6 +493,51 @@ function SearchContent() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Mobile Filter Drawer Overlay */}
+      {mobileFiltersOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden flex justify-end">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
+            onClick={() => setMobileFiltersOpen(false)}
+          />
+          {/* Content Panel */}
+          <aside className="relative w-[300px] max-w-[85vw] bg-white dark:bg-slate-900 h-full shadow-2xl flex flex-col p-6 overflow-y-auto animate-in slide-in-from-right duration-250 z-10 text-on-surface">
+            <div className="flex justify-between items-center pb-4 border-b border-border-low mb-4">
+              <div>
+                <h2 className="font-title-md text-title-md text-primary font-bold">Detaylı Filtreler</h2>
+                <p className="text-caption text-on-surface-variant">Aramayı daraltın</p>
+              </div>
+              <button 
+                onClick={() => setMobileFiltersOpen(false)}
+                className="p-1.5 hover:bg-surface-container-low dark:hover:bg-white/10 rounded-full"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto pr-1">
+              {renderFilterFields()}
+            </div>
+
+            <div className="pt-4 border-t border-border-low mt-4 flex gap-2">
+              <button 
+                onClick={() => { handleResetFilters(); setMobileFiltersOpen(false); }}
+                className="flex-1 border border-border-low text-on-surface py-3 rounded-lg font-label-md text-xs hover:bg-surface-gray transition-all text-center"
+              >
+                Temizle
+              </button>
+              <button 
+                onClick={() => { handleApplyFilters(); setMobileFiltersOpen(false); }} 
+                className="flex-1 bg-primary text-on-primary py-3 rounded-lg font-label-md text-xs hover:opacity-90 transition-all text-center"
+              >
+                Uygula
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
 
       {/* Compare FAB (Contextual) */}
       <div 

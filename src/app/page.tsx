@@ -94,7 +94,7 @@ export default async function HomePage() {
           backgroundImage: 'radial-gradient(circle at 20% 50%, #fea619 0%, transparent 50%), radial-gradient(circle at 80% 20%, #4a6cf7 0%, transparent 50%)'
         }} />
 
-        <div className="max-w-[1280px] mx-auto px-8 relative z-10 text-center">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-8 relative z-10 text-center">
           <h1 className="font-display-lg text-display-lg mb-8 leading-tight">
             Aracını Sor, Gerçeği Öğren
           </h1>
@@ -106,17 +106,17 @@ export default async function HomePage() {
           {/* Search Pill */}
           <div className="max-w-3xl mx-auto relative">
             <form action="/arama" method="get">
-              <div className="flex bg-white rounded-full p-2 shadow-xl focus-within:ring-4 ring-secondary-container/30 transition-all">
-                <span className="material-symbols-outlined text-outline ml-4 self-center">search</span>
+              <div className="flex bg-white rounded-full p-1 sm:p-2 shadow-xl focus-within:ring-4 ring-secondary-container/30 transition-all">
+                <span className="material-symbols-outlined text-outline ml-2 sm:ml-4 self-center text-[20px] sm:text-[24px]">search</span>
                 <input
                   name="q"
-                  className="w-full border-none focus:ring-0 text-on-surface font-body-md text-body-md py-4 px-4 bg-transparent outline-none"
+                  className="w-full border-none focus:ring-0 text-on-surface font-body-md text-sm sm:text-body-md py-2 px-2 sm:py-4 sm:px-4 bg-transparent outline-none"
                   placeholder="BMW 320i kronik sorunlar"
                   type="text"
                 />
                 <button
                   type="submit"
-                  className="bg-secondary-container text-on-secondary-container px-8 rounded-full font-label-md text-label-md hover:scale-105 active:scale-95 transition-all"
+                  className="bg-secondary-container text-on-secondary-container px-4 sm:px-8 rounded-full font-label-md text-xs sm:text-label-md hover:scale-105 active:scale-95 transition-all"
                 >
                   Ara
                 </button>
@@ -127,7 +127,7 @@ export default async function HomePage() {
       </section>
 
       {/* Main Content */}
-      <main className="max-w-[1280px] mx-auto px-8 py-12 flex gap-4">
+      <main className="max-w-[1280px] mx-auto px-4 md:px-8 py-12 flex flex-col lg:flex-row gap-6">
         {/* Filter Sidebar */}
         <aside className="bg-surface-container-low h-fit w-[280px] sticky top-20 hidden lg:flex flex-col p-4 space-y-1 rounded-xl border border-border-low overflow-y-auto flex-shrink-0">
           <div className="mb-4">
@@ -187,7 +187,7 @@ export default async function HomePage() {
                 </p>
               </div>
             </div>
-            <form action="/ai-analiz" method="get" className="flex gap-4">
+            <form action="/ai-analiz" method="get" className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <input
                 name="url"
                 className="flex-1 bg-surface-container-low border border-border-low rounded-lg px-4 py-3 outline-none focus:border-primary transition-all font-body-md text-body-md text-sm"
@@ -196,7 +196,7 @@ export default async function HomePage() {
               />
               <button
                 type="submit"
-                className="bg-primary text-on-primary px-8 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all whitespace-nowrap"
+                className="bg-primary text-on-primary py-3 px-8 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all w-full sm:w-auto text-center"
               >
                 Analiz Et
               </button>
@@ -211,19 +211,19 @@ export default async function HomePage() {
                 Tümünü Gör
               </Link>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
               {brands.slice(0, 6).map((brand: any) => (
                 <Link
                   key={brand.id}
                   href={`/arac/${brand.slug}`}
-                  className="bg-white border border-border-low p-5 rounded-xl text-center hover:shadow-md transition-all group cursor-pointer"
+                  className="bg-white border border-border-low p-3 sm:p-5 rounded-xl text-center hover:shadow-md transition-all group cursor-pointer"
                 >
                   <img
                     alt={brand.name}
                     src={getBrandLogo(brand.slug)}
-                    className="w-12 h-12 mx-auto mb-3 grayscale group-hover:grayscale-0 transition-all object-contain"
+                    className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 grayscale group-hover:grayscale-0 transition-all object-contain"
                   />
-                  <span className="font-label-md text-label-md text-on-surface text-xs">{brand.name}</span>
+                  <span className="font-label-md text-label-md text-on-surface text-xs block truncate">{brand.name}</span>
                 </Link>
               ))}
             </div>
@@ -348,7 +348,7 @@ export default async function HomePage() {
                 <Link
                   key={expert.name}
                   href={`/profil/${expert.slug}`}
-                  className="bg-primary-container text-on-primary p-6 rounded-xl flex items-center gap-4 group cursor-pointer hover:bg-black transition-all"
+                  className="bg-primary-container text-on-primary p-4 sm:p-6 rounded-xl flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 group cursor-pointer hover:bg-black transition-all"
                 >
                   <div className="relative flex-shrink-0">
                     <img
@@ -360,10 +360,10 @@ export default async function HomePage() {
                       <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                     </div>
                   </div>
-                  <div>
-                    <h4 className="font-label-md text-label-md text-on-primary">{expert.name}</h4>
-                    <p className="font-caption text-caption opacity-70 mt-0.5">{expert.title}</p>
-                    <div className="flex gap-2 mt-2">
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-label-md text-label-md text-on-primary truncate">{expert.name}</h4>
+                    <p className="font-caption text-caption opacity-70 mt-0.5 text-xs line-clamp-2">{expert.title}</p>
+                    <div className="flex flex-wrap gap-2 mt-2 justify-center sm:justify-start">
                       {expert.badges.map((badge) => (
                         <span key={badge} className="bg-white/10 px-2 py-0.5 rounded text-[10px] font-bold text-on-primary">
                           {badge}
